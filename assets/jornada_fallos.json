@@ -1,0 +1,69 @@
+{
+  "datosGenerales": {
+    "tipoJornada": "Fallos",
+    "numeroJornada": "014/2024",
+    "fecha": "10/10/2024",
+    "figurasBase": "5 simples - 4 dobles - 5 triples",
+    "apuestasBaseDirectas": "3.888 (19,75%)",
+    "apuestasBaseReducidas": "89 de 108 (Indice de Reducción: 93,60%)",
+    "numeroBoletosBase": 12,
+    "totalApuestasBase": 89
+  },
+  "datosFallos": {
+    "numeroVariantes": 4,
+    "apuestasDirectasCubiertas": 19683,
+    "totalFigurasGlobales": "5 simples - 0 dobles - 9 triples",
+    "apuestasDirectasFallos": "15.795 (80,25%)",
+    "apuestasReducidasFallos": "19 de 108 (Indice de Reducción: 44,88%)",
+    "numeroBoletosFallo": 3,
+    "totalApuestasFallos": 19
+  },
+  "partidos": [
+    "Israel - Francia",
+    "Italia - Bélgica",
+    "Inglaterra - Grecia",
+    "Finlandia - Irlanda",
+    "Austria - Kazajstan",
+    "Noruega - Eslovenia",
+    "Islas Feroe - Armenia",
+    "Bosnia - Alemania",
+    "Hungría - Países Bajos",
+    "Rep.Checa - Albania",
+    "Ucrania - Georgia",
+    "Estonia - Azerbaiyan",
+    "Eslovaquia - Suecia",
+    "Turquía - Montenegro"
+  ],
+  "pronosticosBase": [
+    "  2", "1X2", "1X2", "1X2", "1  ", "1X2", "  2", "  2", "1X2", "1X2", "1X2", "1X2", "1X2", "1  "
+  ],
+  "pronosticosFallos": [
+    "   ", "  2", "  2", "   ", "   ", "  2", "   ", "   ", "1  ", "   ", "   ", "   ", "   ", "   "
+  ],
+  "apuestasBase": [
+    "211X1122X1X221", "2XX11X222X11X1", "21121122X22X11", "2XXX1X2221X221", "21111122XX11X1", 
+    "2XX21X22222X11", "211X1122X11111", "2XX11X222XX211", "21121122X2X2X1", "2XXX1X22212XX1", 
+    "21111122XXX211", "2XX21X22221121", "211X1122X12XX1", "2XX11X222X2X21", "21121122X21121", 
+    "2XXX1X22211111", "21111122XX2X21", "2XX21X2222X2X1", "211X112221X1X1", "2XX11X22XX1221", 
+    "21121122222221", "2XXX1X22X1XX11", "211111222X1221", "2XX21X22X221X1", "211X1122211X21", 
+    "2XX11X22XXXXX1", "2112112222X111", "2XXX1X22X12121", "211111222XXXX1", "2XX21X22X21211", 
+    "211X1122212211", "2XX11X22XX2111", "21121122221XX1", "2XXX1X22X112X1", "211111222X2111", 
+    "2XX21X22X2XX21", "211X1X22XXX2X1", "2XX11122211121", "21121X22X12X21", "2XXX112222X211", 
+    "21111X22XX1X11", "2XX211222121X1", "211X1X22X2X121", "2XX111222X1X11", "21121X22X1X211", 
+    "2XXX1122222121", "21111X22X112X1", "2XX211222X2221", "211X1X22X21XX1", "2XX1112221X2X1", 
+    "21121X22XX2111", "2XXX1122221XX1", "21111X22X221X1", "2XX211222XXXX1", "211X1X22X22211", 
+    "2XX1112222XX21", "21121X22XX1221", "2XXX1122X1X1X1", "21111X22211111", "2XX21122211211", 
+    "211X1X222X2X21", "2XX11122XXX121", "21121X2222XX21", "2XXX1122X12211", "21111X222XX121", 
+    "2XX21122X2X111", "211X1X2221XX11", "2XX11122XX22X1", "21121X22221211", "2XXX1122X11X21", 
+    "21111X222X22X1", "2XX21122X1X221", "211X1X222X11X1", "2XX11122X22X11", "21121X222121X1", 
+    "2XXX1122XX1111", "21111X22222X11", "2XX11122X211X1", "21X21122X1XXX1", "2X1X1X222X1221", 
+    "21X21122X12121", "2X1X1X2222XXX1", "21X11122X11221", "2X121X222X2XX1", "21XX1122X2XX11", 
+    "2X111X22211X21", "21X21122XX2211", "2X1X1X22222111", "21X1112222X1X1"
+  ],
+  "apuestasFallos": [
+    "222X1222X1X2X1", "2111122211XX21", "2XX212221X12X1", "222X1122222X11", "211X12221X1211", 
+    "2XX11222122221", "22221X22X1X121", "211212221XX1X1", "2XX1122211X111", "222X11222X1121", 
+    "21211X22121X21", "2X121222121X21", "22XX11221X21X1", "21211X22112211", "2X221222X12XX1", 
+    "221X122222X221", "22211122X11X11", "22221X222X2211", "222X1X22X21111"
+  ]
+}
