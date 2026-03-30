@@ -42,8 +42,6 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  final PageController _pageController = PageController();
-
   final double altoFijo1 = 340.0; 
   final double altoFijo2 = 485.0; 
 
@@ -68,12 +66,6 @@ class _MainScreenState extends State<MainScreen> {
       print("Error cargando JSON: $e");
       setState(() => isLoading = false);
     }
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
   }
 
   @override
@@ -115,7 +107,8 @@ class _MainScreenState extends State<MainScreen> {
       body: SafeArea(
         child: kIsWeb 
           ? _buildWebView(esFallos, presentacion, pronosticos, datosBase, boletoBase, datosFallos, boletoFallos) 
-          : _buildMobileView(esFallos, presentacion, pronosticos, datosBase, boletoBase, datosFallos, boletoFallos),
+          // Pasamos el context para calcular la altura dinámica de la pantalla
+          : _buildMobileView(context, esFallos, presentacion, pronosticos, datosBase, boletoBase, datosFallos, boletoFallos),
       ),
     );
   }
@@ -140,16 +133,35 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  Widget _buildMobileView(bool esFallos, Widget p1, Widget p2, Widget d1, Widget d2, Widget f1, Widget f2) {
+  // === SOLUCIÓN CONTINUA PARA MÓVIL ===
+  Widget _buildMobileView(BuildContext context, bool esFallos, Widget p1, Widget p2, Widget d1, Widget d2, Widget f1, Widget f2) {
     List<Widget> paginas = [p1, d1];
     if (esFallos) paginas.add(f1);
     paginas.add(p2);
     paginas.add(d2);
     if (esFallos) paginas.add(f2);
 
-    return PageView(
-      controller: _pageController,
-      children: paginas.map((recuadro) => Center(child: FittedBox(fit: BoxFit.contain, child: recuadro))).toList(),
+    // Calculamos el espacio vertical disponible para escalar los recuadros
+    double availableHeight = MediaQuery.of(context).size.height - 20.0;
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal, // Habilitamos el scroll táctil continuo
+      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: paginas.map((recuadro) {
+          return Padding(
+            padding: const EdgeInsets.only(right: 15.0), // Separación justa entre recuadros
+            child: SizedBox(
+              height: availableHeight, // Forzamos a que toque arriba y abajo de la pantalla
+              child: FittedBox(
+                fit: BoxFit.contain, // Escala automáticamente sin deformar
+                child: recuadro,
+              ),
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 }
@@ -196,7 +208,7 @@ class PresentationBox extends StatelessWidget {
 }
 
 // =====================================================================
-// FOTOGRAMA 2: DATOS GENERALES (CORRECCIÓN PADDING)
+// FOTOGRAMA 2: DATOS GENERALES 
 // =====================================================================
 class GeneralDataBox extends StatelessWidget {
   final double height;
@@ -231,7 +243,6 @@ class GeneralDataBox extends StatelessWidget {
   }
   TableRow _buildDataRow(String label, String value) {
     return TableRow(children: [
-      // === REDUCCIÓN DE MARGEN VERTICAL PARA EVITAR OVERFLOW ===
       Padding(padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0), child: Text(label, textAlign: TextAlign.right, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 14))),
       Padding(padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0), child: Text(value, textAlign: TextAlign.left, style: const TextStyle(color: Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: 14))),
     ]);
@@ -239,7 +250,7 @@ class GeneralDataBox extends StatelessWidget {
 }
 
 // =====================================================================
-// FOTOGRAMA 3: DATOS FALLOS (CORRECCIÓN PADDING)
+// FOTOGRAMA 3: DATOS FALLOS 
 // =====================================================================
 class FallosDataBox extends StatelessWidget {
   final double height;
@@ -259,12 +270,12 @@ class FallosDataBox extends StatelessWidget {
             columnWidths: const { 0: FlexColumnWidth(4.2), 1: FlexColumnWidth(5.8) },
             defaultVerticalAlignment: TableCellVerticalAlignment.middle,
             children: [
-              _buildDataRow('Número de Variantes', datos['numeroVariantes'].toString()),
-              _buildDataRow('Apuestas Directas Cubiertas', datos['apuestasDirectasCubiertas'].toString()),
-              _buildDataRow('Total Figuras Globales', datos['totalFigurasGlobales']),
-              _buildDataRow('Apuestas Directas Fallos', datos['apuestasDirectasFallos']),
-              _buildDataRow('Apuestas Reducidas Fallos', datos['apuestasReducidasFallos']),
-              _buildDataRow('Número de Boletos con Fallo', "${datos['numeroBoletosFallo']} boletos"),
+              _buildDataRow('Número de Variantes', datos['numeroVariantes']?.toString() ?? ''),
+              _buildDataRow('Apuestas Directas Cubiertas', datos['apuestasDirectasCubiertas']?.toString() ?? ''),
+              _buildDataRow('Total Figuras Globales', datos['totalFigurasGlobales'] ?? ''),
+              _buildDataRow('Apuestas Directas Fallos', datos['apuestasDirectasFallos'] ?? ''),
+              _buildDataRow('Apuestas Reducidas Fallos', datos['apuestasReducidasFallos'] ?? ''),
+              _buildDataRow('Número de Boletos con Fallo', "${datos['numeroBoletosFallo'] ?? ''} boletos"),
             ],
           ),
         ],
@@ -273,7 +284,6 @@ class FallosDataBox extends StatelessWidget {
   }
   TableRow _buildDataRow(String label, String value) {
     return TableRow(children: [
-      // === REDUCCIÓN DE MARGEN VERTICAL PARA EVITAR OVERFLOW ===
       Padding(padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0), child: Text(label, textAlign: TextAlign.right, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 14))),
       Padding(padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0), child: Text(value, textAlign: TextAlign.left, style: const TextStyle(color: Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: 14))),
     ]);
@@ -385,7 +395,7 @@ class PronosticosBox extends StatelessWidget {
 }
 
 // =====================================================================
-// FOTOGRAMAS 5 y 6: CARRUSELES DE BOLETOS (CORRECCIÓN BOTONES)
+// FOTOGRAMAS 5 y 6: CARRUSELES DE BOLETOS 
 // =====================================================================
 class BoletoBox extends StatefulWidget {
   final double height;
@@ -403,7 +413,6 @@ class _BoletoBoxState extends State<BoletoBox> {
 
   @override
   Widget build(BuildContext context) {
-    // === CÁLCULO DINÁMICO TRASLADADO AL BUILD ===
     int totalTickets = (widget.apuestas.length / 8).ceil();
     if (totalTickets == 0) totalTickets = 1;
 
@@ -417,9 +426,8 @@ class _BoletoBoxState extends State<BoletoBox> {
         children: [
           Row(
             children: [
-              // === MEJORA TÁCTIL DEL BOTÓN PREV ===
               GestureDetector(
-                behavior: HitTestBehavior.opaque, // Hace que toda el área sea clicable, no solo las letras
+                behavior: HitTestBehavior.opaque, 
                 onTap: () => setState(() => currentTicket = (currentTicket - 1 + totalTickets) % totalTickets),
                 child: const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 5.0), 
@@ -429,7 +437,6 @@ class _BoletoBoxState extends State<BoletoBox> {
               const Spacer(), 
               Text(widget.titulo, style: const TextStyle(fontSize: 22, color: Color.fromRGBO(207, 7, 7, 0.938), fontWeight: FontWeight.bold)),
               const Spacer(), 
-              // === MEJORA TÁCTIL DEL BOTÓN NEXT ===
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: () => setState(() => currentTicket = (currentTicket + 1) % totalTickets),
