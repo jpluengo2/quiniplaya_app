@@ -30,6 +30,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_launcher_icons: ^0.13.1
   # Librería para guardar el nombre, jornada y resultados
   shared_preferences: ^2.2.2
   # Librería para futuras peticiones a Dropbox (la dejamos preparada)
@@ -64,6 +65,11 @@ flutter:
   # Declaramos la carpeta de assets para las imágenes y el JSON
   assets:
     - assets/
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/dadoqpr.png" # La ruta de tu foto del dado
 
   # To add assets to your application, add an assets section, like this:
   # assets:
