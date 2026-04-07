@@ -46,9 +46,6 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  // === SOLUCIÓN MAESTRA: LIENZO VIRTUAL MÁS ANCHO Y ALTURA REAJUSTADA ===
-  // Ancho a 720 da un respiro inmenso en horizontal sin aplastar nada.
-  // Alto a 610 elimina el gran espacio vacío del final.
   final double anchoFijo = kIsWeb ? 560.0 : 720.0; 
   final double altoFijo1 = kIsWeb ? 270.0 : 320.0; 
   final double altoFijo2 = kIsWeb ? 470.0 : 610.0; 
@@ -372,12 +369,10 @@ class PronosticosBox extends StatelessWidget {
     }
 
     return GridItemContainer(
-      // === SOLUCIÓN: Margen exterior pequeño para usar casi todo el 720px en la tabla interior ===
       width: width, height: height, paddingHorizontal: kIsWeb ? 35.0 : 15.0, paddingVertical: kIsWeb ? 2.0 : 6.0,
       child: Column(children: [
-      Text('Pronósticos Resultados Escrutinio', textAlign: TextAlign.center, style: TextStyle(fontSize: kIsWeb ? 22 : 28, color: const Color.fromRGBO(207, 7, 7, 0.938), fontWeight: FontWeight.bold)), 
+      Text('Pronósticos Resultados Escrutinio', textAlign: TextAlign.center, style: TextStyle(fontSize: kIsWeb ? 22 : 26, color: const Color.fromRGBO(207, 7, 7, 0.938), fontWeight: FontWeight.bold)), 
       const SizedBox(height: 2), 
-      // === SOLUCIÓN: Flex ratios ajustados para que las columnas se separen de forma natural ===
       Expanded(child: Table(columnWidths: const { 0: FlexColumnWidth(4.5), 1: FlexColumnWidth(2.0), 2: FlexColumnWidth(2.0), 3: FlexColumnWidth(2.5) }, defaultVerticalAlignment: TableCellVerticalAlignment.middle, 
         children: [
           const TableRow(children: [SizedBox(height: 4), SizedBox(height: 4), SizedBox(height: 4), SizedBox(height: 4)]), 
@@ -408,7 +403,6 @@ class PronosticosBox extends StatelessWidget {
 
     return TableRow(children: [
       Padding(
-        // Generoso padding derecho para separar de los signos
         padding: EdgeInsets.symmetric(vertical: kIsWeb ? 3.5 : 4.0).copyWith(right: 25.0), 
         child: FittedBox(
           alignment: Alignment.centerLeft,
@@ -448,8 +442,8 @@ class _BoletoBoxState extends State<BoletoBox> {
     List<int> aciertosBoletoActual = [];
     for (int i = 0; i < apuestasEnEsteBoleto; i++) { String apuesta = widget.apuestas[startIndex + i]; int count = 0; for (int r = 0; r < 14; r++) { if (widget.resultados[r] != '0' && r < apuesta.length && apuesta[r] == widget.resultados[r]) count++; } aciertosBoletoActual.add(count); }
     return GridItemContainer(
-      // Padding exterior reducido a 15.0 para no asfixiar el interior
-      width: widget.width, height: widget.height, paddingHorizontal: kIsWeb ? 35.0 : 15.0, paddingVertical: kIsWeb ? 2.0 : 10.0,
+      // === SOLUCIÓN MARCO ESTIRADO: paddingHorizontal a 5.0 para aprovechar el máximo de pantalla ===
+      width: widget.width, height: widget.height, paddingHorizontal: kIsWeb ? 35.0 : 5.0, paddingVertical: kIsWeb ? 2.0 : 10.0,
       child: Column(children: [Row(children: [GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => currentTicket = (currentTicket - 1 + totalTickets) % totalTickets), child: Padding(padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 5.0), child: Text('<<', style: TextStyle(fontSize: kIsWeb ? 28 : 38, color: const Color(0xFF080868), fontWeight: FontWeight.w900, letterSpacing: -2)))), const Spacer(), Text(widget.titulo, style: TextStyle(fontSize: kIsWeb ? 22 : 28, color: const Color.fromRGBO(207, 7, 7, 0.938), fontWeight: FontWeight.bold)), const Spacer(), GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => currentTicket = (currentTicket + 1) % totalTickets), child: Padding(padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 5.0), child: Text('>>', style: TextStyle(fontSize: kIsWeb ? 28 : 38, color: const Color(0xFF080868), fontWeight: FontWeight.w900, letterSpacing: -2))))]), const SizedBox(height: 15), Expanded(child: Table(columnWidths: const { 0: FlexColumnWidth(1.2), 1: FlexColumnWidth(1.0), 2: FlexColumnWidth(1.0), 3: FlexColumnWidth(1.0), 4: FlexColumnWidth(1.0), 5: FlexColumnWidth(1.0), 6: FlexColumnWidth(1.0), 7: FlexColumnWidth(1.0), 8: FlexColumnWidth(1.0) }, defaultVerticalAlignment: TableCellVerticalAlignment.middle, children: [_buildTopHeaderRow(apuestasEnEsteBoleto, aciertosBoletoActual), ...List.generate(14, (index) => _buildBetRow(index + 1, apuestasEnEsteBoleto, startIndex)), _buildBottomHeaderRow(apuestasEnEsteBoleto, startIndex)]))])
     );
   }
@@ -464,8 +458,8 @@ class _BoletoBoxState extends State<BoletoBox> {
       verticalAlignment: TableCellVerticalAlignment.fill, 
       child: Container(
         color: isOdd ? const Color(0xFFFF6347) : Colors.white, 
-        // Padding interno comedido para no forzar el colapso
-        padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: kIsWeb ? 2.5 : 2.5), 
+        // === SOLUCIÓN: Padding horizontal ampliado a 8.0 para que se vea el rojo en los bordes de la columna ===
+        padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: kIsWeb ? 2.5 : 2.5), 
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [_buildSmallSquare('1', isMarked: markedSymbol == '1', isOddColumn: isOdd, resultado: resultadoPartido), _buildSmallSquare('X', isMarked: markedSymbol == 'X', isOddColumn: isOdd, resultado: resultadoPartido), _buildSmallSquare('2', isMarked: markedSymbol == '2', isOddColumn: isOdd, resultado: resultadoPartido)])
       )
     ); 
@@ -477,9 +471,8 @@ class _BoletoBoxState extends State<BoletoBox> {
     Border? border = isOddColumn ? null : Border.all(color: Colors.redAccent, width: 1.0);
     return Expanded(
       child: Container(
-        // === SOLUCIÓN: Márgenes internos y externos lógicos para letra 20 ===
-        margin: const EdgeInsets.symmetric(horizontal: 2.0, vertical: 1.5), 
-        padding: EdgeInsets.symmetric(vertical: kIsWeb ? 0.0 : 1.0),
+        // === SOLUCIÓN: Margen horizontal ampliado a 3.5 para separar los signos y ver más rojo ===
+        margin: const EdgeInsets.symmetric(horizontal: 3.5, vertical: 1.5), 
         alignment: Alignment.center, 
         decoration: BoxDecoration(color: bgColor, border: border), 
         child: Text(text, style: TextStyle(color: textColor, fontWeight: isMarked ? FontWeight.bold : FontWeight.normal, fontSize: kIsWeb ? 11 : 20))
