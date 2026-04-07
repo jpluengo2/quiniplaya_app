@@ -48,7 +48,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   final double anchoFijo = kIsWeb ? 560.0 : 660.0; 
   final double altoFijo1 = kIsWeb ? 270.0 : 320.0; 
-  final double altoFijo2 = kIsWeb ? 470.0 : 620.0; 
+  final double altoFijo2 = kIsWeb ? 470.0 : 640.0; 
 
   Map<String, dynamic>? jsonData;
   bool isReady = false; 
@@ -67,23 +67,21 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Future<void> _inicializarAppYDescargar() async {
-    // === 1º MEJORA: PANTALLA DE INICIO MÁS LARGA ===
-    // Congelamos la pantalla inicial 2.5 segundos para que se vea el logo
     setState(() { hasError = false; loadingProgress = 0.05; loadingMessage = "Arrancando motor combinatorio..."; });
     await Future.delayed(const Duration(milliseconds: 2500)); 
 
     try {
       prefs = await SharedPreferences.getInstance();
-      setState(() { loadingProgress = 0.25; loadingMessage = "Estableciendo conexión segura con el servidor..."; });
+      setState(() { loadingProgress = 0.25; loadingMessage = "Estableciendo conexión segura..."; });
       await Future.delayed(const Duration(milliseconds: 800)); 
 
-      setState(() { loadingProgress = 0.4; loadingMessage = "Descargando datos de la jornada en curso..."; });
+      setState(() { loadingProgress = 0.4; loadingMessage = "Descargando datos de la jornada..."; });
 
       final String urlDropbox = 'https://dl.dropboxusercontent.com/scl/fi/d5bp0vgwuv36eaoug1b6c/jornada.json?rlkey=42wxfnlekmy7bf1vwnyq791bv';
       final response = await http.get(Uri.parse(urlDropbox)).timeout(const Duration(seconds: 15));
 
       if (response.statusCode == 200) {
-        setState(() { loadingProgress = 0.7; loadingMessage = "Procesando y estructurando la información..."; });
+        setState(() { loadingProgress = 0.7; loadingMessage = "Procesando información..."; });
         await Future.delayed(const Duration(milliseconds: 600)); 
         
         final String jsonString = utf8.decode(response.bodyBytes);
@@ -103,16 +101,16 @@ class _MainScreenState extends State<MainScreen> {
           }
         }
 
-        setState(() { jsonData = data; loadingProgress = 1.0; loadingMessage = "¡Carga completada satisfactoriamente!"; });
+        setState(() { jsonData = data; loadingProgress = 1.0; loadingMessage = "¡Carga completada!"; });
         await Future.delayed(const Duration(milliseconds: 1500));
         setState(() { isReady = true; });
 
         WidgetsBinding.instance.addPostFrameCallback((_) { _gestionarUsuario(); });
       } else {
-        _mostrarError("Se ha producido un error en el servidor (Código: ${response.statusCode}).\nNo ha sido posible acceder a los datos de la jornada.");
+        _mostrarError("Se ha producido un error en el servidor (Código: ${response.statusCode}).\nNo ha sido posible acceder a los datos.");
       }
     } catch (e) {
-      _mostrarError("No se ha podido establecer conexión.\nPor favor, compruebe su acceso a internet y vuelva a intentarlo.");
+      _mostrarError("No se ha podido establecer conexión.\nPor favor, compruebe su acceso a internet.");
     }
   }
 
@@ -232,7 +230,33 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget _buildLoadingScreen() {
     bool isComplete = loadingProgress >= 1.0;
-    return Center(child: Container(width: 400, padding: const EdgeInsets.all(30.0), decoration: BoxDecoration(color: const Color.fromRGBO(255, 248, 220, 1), borderRadius: BorderRadius.circular(15.0), border: Border.all(color: isComplete ? Colors.green : Colors.red, width: 3.0), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, spreadRadius: 5)]), child: Column(mainAxisSize: MainAxisSize.min, children: [ClipRRect(borderRadius: BorderRadius.circular(8.0), child: Image.asset('assets/dadoqpr.png', height: 80, fit: BoxFit.cover)), const SizedBox(height: 20), const Text('LA QUINIPLAYA MILLONARIA', textAlign: TextAlign.center, style: TextStyle(fontSize: 22, color: Color.fromRGBO(207, 7, 7, 0.938), fontWeight: FontWeight.bold)), const SizedBox(height: 30), Text(loadingMessage, textAlign: TextAlign.center, style: TextStyle(fontSize: 16, color: isComplete ? Colors.green.shade700 : const Color(0xFF080868), fontWeight: FontWeight.bold)), const SizedBox(height: 15), Row(children: [Expanded(child: ClipRRect(borderRadius: BorderRadius.circular(10), child: LinearProgressIndicator(value: loadingProgress, minHeight: 10, backgroundColor: Colors.grey.shade300, color: isComplete ? Colors.green : const Color(0xFF080868)))), const SizedBox(width: 10), Text("${(loadingProgress * 100).toInt()}%", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black54))]), if (isComplete) ...[ const SizedBox(height: 20), const Icon(Icons.check_circle, color: Colors.green, size: 40) ]])));
+    return Center(
+      child: SingleChildScrollView(
+        child: Container(
+          width: kIsWeb ? 400 : 350, 
+          margin: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.all(20.0), 
+          decoration: BoxDecoration(color: const Color.fromRGBO(255, 248, 220, 1), borderRadius: BorderRadius.circular(15.0), border: Border.all(color: isComplete ? Colors.green : Colors.red, width: 3.0), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, spreadRadius: 5)]), 
+          child: Column(
+            mainAxisSize: MainAxisSize.min, 
+            children: [
+              ClipRRect(borderRadius: BorderRadius.circular(8.0), child: Image.asset('assets/dadoqpr.png', height: 70, fit: BoxFit.cover)), 
+              const SizedBox(height: 15), 
+              Text('LA QUINIPLAYA MILLONARIA', textAlign: TextAlign.center, style: TextStyle(fontSize: kIsWeb ? 22 : 18, color: const Color.fromRGBO(207, 7, 7, 0.938), fontWeight: FontWeight.bold)), 
+              const SizedBox(height: 20), 
+              FittedBox(fit: BoxFit.scaleDown, child: Text(loadingMessage, textAlign: TextAlign.center, style: TextStyle(fontSize: kIsWeb ? 16 : 13, color: isComplete ? Colors.green.shade700 : const Color(0xFF080868), fontWeight: FontWeight.bold))), 
+              const SizedBox(height: 15), 
+              Row(children: [
+                Expanded(child: ClipRRect(borderRadius: BorderRadius.circular(10), child: LinearProgressIndicator(value: loadingProgress, minHeight: 10, backgroundColor: Colors.grey.shade300, color: isComplete ? Colors.green : const Color(0xFF080868)))), 
+                const SizedBox(width: 10), 
+                Text("${(loadingProgress * 100).toInt()}%", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black54))
+              ]), 
+              if (isComplete) ...[ const SizedBox(height: 15), const Icon(Icons.check_circle, color: Colors.green, size: 30) ]
+            ]
+          )
+        ),
+      )
+    );
   }
 
   Widget _buildErrorScreen() {
@@ -345,13 +369,31 @@ class PronosticosBox extends StatelessWidget {
     }
 
     return GridItemContainer(
-      // === 3º MEJORA: PADDING LATERAL PASA A 50.0 ===
-      width: width, height: height, paddingHorizontal: kIsWeb ? 35.0 : 50.0, paddingVertical: kIsWeb ? 2.0 : 12.0,
+      width: width, height: height, paddingHorizontal: kIsWeb ? 35.0 : 50.0, paddingVertical: kIsWeb ? 2.0 : 6.0,
       child: Column(children: [
-      Text('Pronósticos Resultados Escrutinio', textAlign: TextAlign.center, style: TextStyle(fontSize: kIsWeb ? 22 : 28, color: const Color.fromRGBO(207, 7, 7, 0.938), fontWeight: FontWeight.bold)), 
-      const SizedBox(height: 5),
-      // === 2º MEJORA: TABLA REAJUSTADA PARA ENSANCHAR EL DROPDOWN ===
-      Expanded(child: Table(columnWidths: const { 0: FlexColumnWidth(4.2), 1: FlexColumnWidth(1.8), 2: FlexColumnWidth(1.8), 3: FlexColumnWidth(2.2) }, defaultVerticalAlignment: TableCellVerticalAlignment.middle, children: [const TableRow(children: [SizedBox(height: 8), SizedBox(height: 8), SizedBox(height: 8), SizedBox(height: 8)]), ...List.generate(14, (index) => _buildPartidoRow(index, index < partidos.length ? partidos[index] : "Partido ${index+1}")), TableRow(children: [const SizedBox(height: 15), Container(height: kIsWeb ? 22 : 32, alignment: Alignment.center, decoration: BoxDecoration(color: Colors.amber, border: Border.all(color: const Color(0xFF080868), width: 1)), child: Text("$totalAciertosPronostico Oros", style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 12 : 18))), const SizedBox(height: 15), Padding(padding: const EdgeInsets.only(left: 8.0), child: Row(children: [Expanded(child: _buildBadge('0', isBlue: true)), const SizedBox(width: 4), Expanded(child: _buildBadge(recuentoGlobal[0].toString(), isBlue: false))]))])]))])
+      Text('Pronósticos Resultados Escrutinio', textAlign: TextAlign.center, style: TextStyle(fontSize: kIsWeb ? 22 : 26, color: const Color.fromRGBO(207, 7, 7, 0.938), fontWeight: FontWeight.bold)), 
+      const SizedBox(height: 2), 
+      Expanded(child: Table(columnWidths: const { 0: FlexColumnWidth(4.8), 1: FlexColumnWidth(1.6), 2: FlexColumnWidth(1.6), 3: FlexColumnWidth(2.0) }, defaultVerticalAlignment: TableCellVerticalAlignment.middle, 
+        children: [
+          const TableRow(children: [SizedBox(height: 4), SizedBox(height: 4), SizedBox(height: 4), SizedBox(height: 4)]), 
+          ...List.generate(14, (index) => _buildPartidoRow(index, index < partidos.length ? partidos[index] : "Partido ${index+1}")), 
+          const TableRow(children: [SizedBox(height: 4), SizedBox(height: 4), SizedBox(height: 4), SizedBox(height: 4)]),
+          TableRow(children: [
+            const SizedBox(), 
+            Container(
+              height: kIsWeb ? 22 : 32, 
+              alignment: Alignment.center, 
+              padding: const EdgeInsets.symmetric(horizontal: 2.0),
+              decoration: BoxDecoration(color: Colors.amber, border: Border.all(color: const Color(0xFF080868), width: 1)), 
+              child: FittedBox(
+                fit: BoxFit.scaleDown, 
+                child: Text("$totalAciertosPronostico Oros", style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 12 : 18))
+              )
+            ), 
+            const SizedBox(), 
+            Padding(padding: const EdgeInsets.only(left: 8.0), child: Row(children: [Expanded(child: _buildBadge('0', isBlue: true)), const SizedBox(width: 4), Expanded(child: _buildBadge(recuentoGlobal[0].toString(), isBlue: false))]))
+          ])
+        ]))])
     );
   }
 
@@ -359,9 +401,16 @@ class PronosticosBox extends StatelessWidget {
     String nombrePartido = "${(index + 1).toString().padLeft(2, '0')}. $partido"; String pBase = index < pronosticosBase.length ? pronosticosBase[index].padRight(3, ' ') : "   "; String pFallo = index < pronosticosFallos.length ? pronosticosFallos[index].padRight(3, ' ') : "   "; String resultado = resultados[index]; int categoria = 14 - index; 
 
     return TableRow(children: [
-      Padding(padding: EdgeInsets.symmetric(vertical: kIsWeb ? 3.5 : 3.5).copyWith(right: 12.0), child: Text(nombrePartido, style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 13 : 19))), 
+      Padding(
+        padding: EdgeInsets.symmetric(vertical: kIsWeb ? 3.5 : 3.5).copyWith(right: 15.0), 
+        child: FittedBox(
+          alignment: Alignment.centerLeft,
+          fit: BoxFit.scaleDown,
+          child: Text(nombrePartido, style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 13 : 19))
+        )
+      ), 
       TableCell(verticalAlignment: TableCellVerticalAlignment.fill, child: Container(decoration: BoxDecoration(color: Colors.redAccent, border: Border.all(color: Colors.redAccent, width: 0.5)), padding: const EdgeInsets.symmetric(horizontal: 4.0), child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [Expanded(child: _buildSignoDin('1', pBase[0], pFallo[0], resultado)), Expanded(child: _buildSignoDin('X', pBase[1], pFallo[1], resultado)), Expanded(child: _buildSignoDin('2', pBase[2], pFallo[2], resultado))]))), 
-      Padding(padding: const EdgeInsets.only(left: 12.0, right: 12.0), child: Container(height: kIsWeb ? 24 : 36, padding: const EdgeInsets.symmetric(horizontal: 4.0), decoration: BoxDecoration(color: Colors.amber, borderRadius: BorderRadius.circular(6.0), border: Border.all(color: Colors.black, width: 1.0)), child: DropdownButtonHideUnderline(child: DropdownButton<String>(value: resultado, isExpanded: true, isDense: true, icon: Icon(Icons.keyboard_arrow_down, color: Colors.black, size: kIsWeb ? 18 : 26), dropdownColor: Colors.white, borderRadius: BorderRadius.circular(12.0), alignment: Alignment.center, style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 12 : 19), items: const [DropdownMenuItem(value: '0', alignment: Alignment.center, child: Text(' ')), DropdownMenuItem(value: '1', alignment: Alignment.center, child: Text('1')), DropdownMenuItem(value: 'X', alignment: Alignment.center, child: Text('X')), DropdownMenuItem(value: '2', alignment: Alignment.center, child: Text('2'))], onChanged: (val) { if (val != null) onResultadoChanged(index, val); })))), 
+      Padding(padding: const EdgeInsets.only(left: 12.0, right: 12.0), child: Container(height: kIsWeb ? 24 : 34, padding: const EdgeInsets.symmetric(horizontal: 4.0), decoration: BoxDecoration(color: Colors.amber, borderRadius: BorderRadius.circular(6.0), border: Border.all(color: Colors.black, width: 1.0)), child: DropdownButtonHideUnderline(child: DropdownButton<String>(value: resultado, isExpanded: true, isDense: true, icon: Icon(Icons.keyboard_arrow_down, color: Colors.black, size: kIsWeb ? 18 : 26), dropdownColor: Colors.white, borderRadius: BorderRadius.circular(12.0), alignment: Alignment.center, style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 12 : 19), items: const [DropdownMenuItem(value: '0', alignment: Alignment.center, child: Text(' ')), DropdownMenuItem(value: '1', alignment: Alignment.center, child: Text('1')), DropdownMenuItem(value: 'X', alignment: Alignment.center, child: Text('X')), DropdownMenuItem(value: '2', alignment: Alignment.center, child: Text('2'))], onChanged: (val) { if (val != null) onResultadoChanged(index, val); })))), 
       Padding(padding: const EdgeInsets.only(left: 8.0), child: Row(children: [Expanded(child: _buildBadge(categoria.toString(), isBlue: true)), const SizedBox(width: 4), Expanded(child: _buildBadge(recuentoGlobal[categoria].toString(), isBlue: false))]))]);
   }
 
@@ -369,10 +418,12 @@ class PronosticosBox extends StatelessWidget {
     bool isFallo = charFallo != ' '; bool isBase = charBase != ' '; bool isJugado = isFallo || isBase; bool isResultado = (resultado == texto);
     Color bgColor = Colors.white; Color textColor = isJugado ? const Color(0xFF080868) : const Color.fromRGBO(255, 180, 180, 1);
     if (resultado == '0') { if (isFallo) bgColor = const Color(0xFF6CF114); else if (isBase) bgColor = const Color(0xFF21F0F0); } else { if (isResultado) { if (isJugado) { bgColor = Colors.amber; textColor = const Color(0xFF080868); } else { bgColor = Colors.grey.shade400; textColor = const Color(0xFF080868); } } else { if (isJugado) { bgColor = Colors.redAccent; textColor = Colors.white; } else { bgColor = Colors.white; } } }
-    return Container(height: kIsWeb ? 20 : 30, margin: const EdgeInsets.symmetric(horizontal: 1.5), alignment: Alignment.center, decoration: BoxDecoration(color: bgColor), child: Text(texto, textAlign: TextAlign.center, style: TextStyle(color: textColor, fontWeight: isJugado ? FontWeight.bold : FontWeight.normal, fontSize: kIsWeb ? 11 : 18)));
+    return Container(height: kIsWeb ? 20 : 28, margin: const EdgeInsets.symmetric(horizontal: 1.5), alignment: Alignment.center, decoration: BoxDecoration(color: bgColor), child: Text(texto, textAlign: TextAlign.center, style: TextStyle(color: textColor, fontWeight: isJugado ? FontWeight.bold : FontWeight.normal, fontSize: kIsWeb ? 11 : 18)));
   }
 
-  Widget _buildBadge(String texto, {required bool isBlue}) { return Container(height: kIsWeb ? 22 : 32, alignment: Alignment.center, decoration: BoxDecoration(color: isBlue ? const Color.fromRGBO(33, 240, 240, 0.8) : Colors.white, border: Border.all(color: const Color(0xFF080868), width: 1.5)), child: Text(texto, style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 11 : 18))); }
+  Widget _buildBadge(String texto, {required bool isBlue}) { 
+    return Container(height: kIsWeb ? 22 : 30, alignment: Alignment.center, decoration: BoxDecoration(color: isBlue ? const Color.fromRGBO(33, 240, 240, 0.8) : Colors.white, border: Border.all(color: const Color(0xFF080868), width: 1.5)), child: Text(texto, style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 11 : 18))); 
+  }
 }
 
 class BoletoBox extends StatefulWidget {
@@ -390,23 +441,45 @@ class _BoletoBoxState extends State<BoletoBox> {
     List<int> aciertosBoletoActual = [];
     for (int i = 0; i < apuestasEnEsteBoleto; i++) { String apuesta = widget.apuestas[startIndex + i]; int count = 0; for (int r = 0; r < 14; r++) { if (widget.resultados[r] != '0' && r < apuesta.length && apuesta[r] == widget.resultados[r]) count++; } aciertosBoletoActual.add(count); }
     return GridItemContainer(
-      // === 3º MEJORA: PADDING LATERAL PASA A 50.0 ===
-      width: widget.width, height: widget.height, paddingHorizontal: kIsWeb ? 35.0 : 50.0, paddingVertical: kIsWeb ? 2.0 : 12.0,
+      // === SOLUCIÓN: PARA COMPENSAR LA EXPANSIÓN, REDUCIMOS PADDING VERTICAL DEL CONTENEDOR (DE 12.0 A 6.0) ===
+      width: widget.width, height: widget.height, paddingHorizontal: kIsWeb ? 35.0 : 50.0, paddingVertical: kIsWeb ? 2.0 : 6.0,
       child: Column(children: [Row(children: [GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => currentTicket = (currentTicket - 1 + totalTickets) % totalTickets), child: Padding(padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 5.0), child: Text('<<', style: TextStyle(fontSize: kIsWeb ? 28 : 38, color: const Color(0xFF080868), fontWeight: FontWeight.w900, letterSpacing: -2)))), const Spacer(), Text(widget.titulo, style: TextStyle(fontSize: kIsWeb ? 22 : 28, color: const Color.fromRGBO(207, 7, 7, 0.938), fontWeight: FontWeight.bold)), const Spacer(), GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => currentTicket = (currentTicket + 1) % totalTickets), child: Padding(padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 5.0), child: Text('>>', style: TextStyle(fontSize: kIsWeb ? 28 : 38, color: const Color(0xFF080868), fontWeight: FontWeight.w900, letterSpacing: -2))))]), const SizedBox(height: 15), Expanded(child: Table(columnWidths: const { 0: FlexColumnWidth(1.2), 1: FlexColumnWidth(1.0), 2: FlexColumnWidth(1.0), 3: FlexColumnWidth(1.0), 4: FlexColumnWidth(1.0), 5: FlexColumnWidth(1.0), 6: FlexColumnWidth(1.0), 7: FlexColumnWidth(1.0), 8: FlexColumnWidth(1.0) }, defaultVerticalAlignment: TableCellVerticalAlignment.middle, children: [_buildTopHeaderRow(apuestasEnEsteBoleto, aciertosBoletoActual), ...List.generate(14, (index) => _buildBetRow(index + 1, apuestasEnEsteBoleto, startIndex)), _buildBottomHeaderRow(apuestasEnEsteBoleto, startIndex)]))])
     );
   }
 
-  TableRow _buildTopHeaderRow(int numApuestas, List<int> aciertos) { return TableRow(children: [_buildHeaderText('B${currentTicket + 1}'), ...List.generate(8, (index) { if (index >= numApuestas) return _buildHeaderText(''); int count = aciertos[index]; return Container(height: kIsWeb ? 22 : 32, alignment: Alignment.center, color: count > 9 ? Colors.yellow : Colors.transparent, child: Text(count.toString(), style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 12 : 19))); })]); }
+  // === ALTURAS MÁS COMPACTAS (30px) PARA EVITAR DESBORDAMIENTOS CON LETRA 20 ===
+  TableRow _buildTopHeaderRow(int numApuestas, List<int> aciertos) { return TableRow(children: [_buildHeaderText('B${currentTicket + 1}'), ...List.generate(8, (index) { if (index >= numApuestas) return _buildHeaderText(''); int count = aciertos[index]; return Container(height: kIsWeb ? 22 : 30, alignment: Alignment.center, color: count > 9 ? Colors.yellow : Colors.transparent, child: Text(count.toString(), style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 12 : 20))); })]); }
   TableRow _buildBetRow(int rowNum, int numApuestas, int startIdx) { String resultadoPartido = widget.resultados[rowNum - 1]; return TableRow(children: [_buildHeaderText(rowNum.toString()), ...List.generate(8, (colIndex) { if (colIndex >= numApuestas) return const SizedBox(); int betNum = startIdx + colIndex + 1; bool isOdd = betNum % 2 != 0; String apuestaCompleta = widget.apuestas[startIdx + colIndex]; String mark = ' '; if(apuestaCompleta.length >= rowNum) mark = apuestaCompleta[rowNum - 1]; return _buildBetCell(isOdd: isOdd, markedSymbol: mark, resultadoPartido: resultadoPartido); })]); }
   TableRow _buildBottomHeaderRow(int numApuestas, int startIdx) { return TableRow(children: [_buildHeaderText('apu.'), ...List.generate(8, (index) => _buildHeaderText(index < numApuestas ? (startIdx + index + 1).toString() : ''))]); }
-  Widget _buildHeaderText(String text) { return Container(height: kIsWeb ? 22 : 32, alignment: Alignment.center, child: Text(text, style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 12 : 19))); }
+  Widget _buildHeaderText(String text) { return Container(height: kIsWeb ? 22 : 30, alignment: Alignment.center, child: Text(text, style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 12 : 20))); }
   
-  Widget _buildBetCell({required bool isOdd, required String markedSymbol, required String resultadoPartido}) { return TableCell(verticalAlignment: TableCellVerticalAlignment.fill, child: Container(color: isOdd ? const Color(0xFFFF6347) : Colors.white, padding: EdgeInsets.symmetric(horizontal: 2.0, vertical: kIsWeb ? 2.5 : 3.5), child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [_buildSmallSquare('1', isMarked: markedSymbol == '1', isOddColumn: isOdd, resultado: resultadoPartido), _buildSmallSquare('X', isMarked: markedSymbol == 'X', isOddColumn: isOdd, resultado: resultadoPartido), _buildSmallSquare('2', isMarked: markedSymbol == '2', isOddColumn: isOdd, resultado: resultadoPartido)]))); }
+  Widget _buildBetCell({required bool isOdd, required String markedSymbol, required String resultadoPartido}) { 
+    return TableCell(
+      verticalAlignment: TableCellVerticalAlignment.fill, 
+      child: Container(
+        color: isOdd ? const Color(0xFFFF6347) : Colors.white, 
+        // Recortamos el padding interno de la celda blanca/tomate para cedérselo a los cuadritos
+        padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: kIsWeb ? 2.5 : 1.0), 
+        child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [_buildSmallSquare('1', isMarked: markedSymbol == '1', isOddColumn: isOdd, resultado: resultadoPartido), _buildSmallSquare('X', isMarked: markedSymbol == 'X', isOddColumn: isOdd, resultado: resultadoPartido), _buildSmallSquare('2', isMarked: markedSymbol == '2', isOddColumn: isOdd, resultado: resultadoPartido)])
+      )
+    ); 
+  }
 
   Widget _buildSmallSquare(String text, {required bool isMarked, required bool isOddColumn, required String resultado}) {
     bool isResultado = (resultado == text); Color bgColor = Colors.white; Color textColor = isMarked ? const Color(0xFF080868) : const Color.fromRGBO(255, 180, 180, 1);
     if (resultado == '0') { if (isMarked) bgColor = const Color.fromRGBO(33, 240, 240, 1.0); } else { if (isResultado) { if (isMarked) { bgColor = Colors.amber; textColor = const Color(0xFF080868); } else { bgColor = Colors.grey.shade400; textColor = const Color(0xFF080868); } } else { if (isMarked) { bgColor = Colors.redAccent; textColor = Colors.white; } else { bgColor = Colors.white; } } }
     Border? border = isOddColumn ? null : Border.all(color: Colors.redAccent, width: 1.0);
-    return Expanded(child: Container(margin: const EdgeInsets.symmetric(horizontal: 1.5), alignment: Alignment.center, decoration: BoxDecoration(color: bgColor, border: border), child: Text(text, style: TextStyle(color: textColor, fontWeight: isMarked ? FontWeight.bold : FontWeight.normal, fontSize: kIsWeb ? 11 : 18))));
+    return Expanded(
+      child: Container(
+        // === SOLUCIÓN RECUADROS "INFLADOS" Y SEPARADOS ===
+        // Padding: "Infla" el recuadro por dentro para que se vea más grande
+        padding: EdgeInsets.symmetric(vertical: kIsWeb ? 0.0 : 3.0),
+        // Margin: Horizontal 2.5 y Vertical 1.5 para separar los cuadritos a lo ancho y a lo alto (línea de respiro)
+        margin: const EdgeInsets.symmetric(horizontal: 2.5, vertical: 1.5), 
+        alignment: Alignment.center, 
+        decoration: BoxDecoration(color: bgColor, border: border), 
+        child: Text(text, style: TextStyle(color: textColor, fontWeight: isMarked ? FontWeight.bold : FontWeight.normal, fontSize: kIsWeb ? 11 : 20))
+      )
+    );
   }
 }
