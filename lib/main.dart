@@ -373,26 +373,36 @@ class PronosticosBox extends StatelessWidget {
       child: Column(children: [
       Text('Pronósticos Resultados Escrutinio', textAlign: TextAlign.center, style: TextStyle(fontSize: kIsWeb ? 22 : 26, color: const Color.fromRGBO(207, 7, 7, 0.938), fontWeight: FontWeight.bold)), 
       const SizedBox(height: 2), 
-      Expanded(child: Table(columnWidths: const { 0: FlexColumnWidth(4.5), 1: FlexColumnWidth(2.0), 2: FlexColumnWidth(2.0), 3: FlexColumnWidth(2.5) }, defaultVerticalAlignment: TableCellVerticalAlignment.middle, 
+      // === SOLUCIÓN: Más ancho a la columna de pronósticos (1 -> 2.4) robando un poquito a los laterales ===
+      Expanded(child: Table(columnWidths: const { 0: FlexColumnWidth(4.3), 1: FlexColumnWidth(2.4), 2: FlexColumnWidth(1.9), 3: FlexColumnWidth(2.4) }, defaultVerticalAlignment: TableCellVerticalAlignment.middle, 
         children: [
           const TableRow(children: [SizedBox(height: 4), SizedBox(height: 4), SizedBox(height: 4), SizedBox(height: 4)]), 
           ...List.generate(14, (index) => _buildPartidoRow(index, index < partidos.length ? partidos[index] : "Partido ${index+1}")), 
           const TableRow(children: [SizedBox(height: 4), SizedBox(height: 4), SizedBox(height: 4), SizedBox(height: 4)]),
           TableRow(children: [
             const SizedBox(), 
+            // === SOLUCIÓN: Caja de "Oros" reducida en altura y letra para no tocar el marco inferior ===
             Container(
-              height: kIsWeb ? 22 : 36, 
+              height: kIsWeb ? 22 : 28, 
               alignment: Alignment.center, 
               margin: const EdgeInsets.symmetric(horizontal: 5.0),
               padding: const EdgeInsets.symmetric(horizontal: 2.0),
               decoration: BoxDecoration(color: Colors.amber, border: Border.all(color: const Color(0xFF080868), width: 1)), 
               child: FittedBox(
                 fit: BoxFit.scaleDown, 
-                child: Text("$totalAciertosPronostico Oros", style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 12 : 20))
+                child: Text("$totalAciertosPronostico Oros", style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 12 : 17))
               )
             ), 
             const SizedBox(), 
-            Padding(padding: const EdgeInsets.only(left: 15.0), child: Row(children: [Expanded(child: _buildBadge('0', isBlue: true)), const SizedBox(width: 4), Expanded(child: _buildBadge(recuentoGlobal[0].toString(), isBlue: false))]))
+            Padding(
+              padding: const EdgeInsets.only(left: 15.0), 
+              child: Row(children: [
+                // === SOLUCIÓN: Cajas de aciertos finales rebajadas en altura y letra para respetar el espacio ===
+                Expanded(child: _buildBadge('0', isBlue: true, customHeight: kIsWeb ? 22 : 28, customFontSize: kIsWeb ? 11 : 17)), 
+                const SizedBox(width: 4), 
+                Expanded(child: _buildBadge(recuentoGlobal[0].toString(), isBlue: false, customHeight: kIsWeb ? 22 : 28, customFontSize: kIsWeb ? 11 : 17))
+              ])
+            )
           ])
         ]))])
     );
@@ -403,7 +413,7 @@ class PronosticosBox extends StatelessWidget {
 
     return TableRow(children: [
       Padding(
-        padding: EdgeInsets.symmetric(vertical: kIsWeb ? 3.5 : 4.0).copyWith(right: 25.0), 
+        padding: EdgeInsets.symmetric(vertical: kIsWeb ? 3.5 : 3.5).copyWith(right: 20.0), 
         child: FittedBox(
           alignment: Alignment.centerLeft,
           fit: BoxFit.scaleDown,
@@ -418,12 +428,25 @@ class PronosticosBox extends StatelessWidget {
   Widget _buildSignoDin(String texto, String charBase, String charFallo, String resultado) {
     bool isFallo = charFallo != ' '; bool isBase = charBase != ' '; bool isJugado = isFallo || isBase; bool isResultado = (resultado == texto);
     Color bgColor = Colors.white; Color textColor = isJugado ? const Color(0xFF080868) : const Color.fromRGBO(255, 180, 180, 1);
-    if (resultado == '0') { if (isFallo) bgColor = const Color(0xFF6CF114); else if (isBase) bgColor = const Color(0xFF21F0F0); } else { if (isResultado) { if (isJugado) { bgColor = Colors.amber; textColor = const Color(0xFF080868); } else { bgColor = Colors.grey.shade400; textColor = const Color(0xFF080868); } } else { if (isResultado) { bgColor = Colors.redAccent; textColor = Colors.white; } else { bgColor = Colors.white; } } }
-    return Container(height: kIsWeb ? 20 : 30, margin: const EdgeInsets.symmetric(horizontal: 1.5), alignment: Alignment.center, decoration: BoxDecoration(color: bgColor), child: Text(texto, textAlign: TextAlign.center, style: TextStyle(color: textColor, fontWeight: isJugado ? FontWeight.bold : FontWeight.normal, fontSize: kIsWeb ? 11 : 19)));
+    if (resultado == '0') { if (isFallo) bgColor = const Color(0xFF6CF114); else if (isBase) bgColor = const Color(0xFF21F0F0); } else { if (isResultado) { if (isJugado) { bgColor = Colors.amber; textColor = const Color(0xFF080868); } else { bgColor = Colors.grey.shade400; textColor = const Color(0xFF080868); } } else { if (isJugado) { bgColor = Colors.redAccent; textColor = Colors.white; } else { bgColor = Colors.white; } } }
+    return Container(
+      height: kIsWeb ? 20 : 30, 
+      // === SOLUCIÓN: Más margen horizontal (de 1.5 a 3.5) para conseguir esas ansiadas rayas verticales rojas gruesas ===
+      margin: const EdgeInsets.symmetric(horizontal: 3.5), 
+      alignment: Alignment.center, 
+      decoration: BoxDecoration(color: bgColor), 
+      child: Text(texto, textAlign: TextAlign.center, style: TextStyle(color: textColor, fontWeight: isJugado ? FontWeight.bold : FontWeight.normal, fontSize: kIsWeb ? 11 : 19))
+    );
   }
 
-  Widget _buildBadge(String texto, {required bool isBlue}) { 
-    return Container(height: kIsWeb ? 22 : 32, alignment: Alignment.center, decoration: BoxDecoration(color: isBlue ? const Color.fromRGBO(33, 240, 240, 0.8) : Colors.white, border: Border.all(color: const Color(0xFF080868), width: 1.5)), child: Text(texto, style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 11 : 19))); 
+  // Se añade soporte para customHeight y customFontSize para aislar el cambio a la última línea
+  Widget _buildBadge(String texto, {required bool isBlue, double? customHeight, double? customFontSize}) { 
+    return Container(
+      height: customHeight ?? (kIsWeb ? 22 : 32), 
+      alignment: Alignment.center, 
+      decoration: BoxDecoration(color: isBlue ? const Color.fromRGBO(33, 240, 240, 0.8) : Colors.white, border: Border.all(color: const Color(0xFF080868), width: 1.5)), 
+      child: Text(texto, style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: customFontSize ?? (kIsWeb ? 11 : 19)))
+    ); 
   }
 }
 
@@ -442,7 +465,6 @@ class _BoletoBoxState extends State<BoletoBox> {
     List<int> aciertosBoletoActual = [];
     for (int i = 0; i < apuestasEnEsteBoleto; i++) { String apuesta = widget.apuestas[startIndex + i]; int count = 0; for (int r = 0; r < 14; r++) { if (widget.resultados[r] != '0' && r < apuesta.length && apuesta[r] == widget.resultados[r]) count++; } aciertosBoletoActual.add(count); }
     return GridItemContainer(
-      // === SOLUCIÓN MARCO ESTIRADO: paddingHorizontal a 5.0 para aprovechar el máximo de pantalla ===
       width: widget.width, height: widget.height, paddingHorizontal: kIsWeb ? 35.0 : 5.0, paddingVertical: kIsWeb ? 2.0 : 10.0,
       child: Column(children: [Row(children: [GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => currentTicket = (currentTicket - 1 + totalTickets) % totalTickets), child: Padding(padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 5.0), child: Text('<<', style: TextStyle(fontSize: kIsWeb ? 28 : 38, color: const Color(0xFF080868), fontWeight: FontWeight.w900, letterSpacing: -2)))), const Spacer(), Text(widget.titulo, style: TextStyle(fontSize: kIsWeb ? 22 : 28, color: const Color.fromRGBO(207, 7, 7, 0.938), fontWeight: FontWeight.bold)), const Spacer(), GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => currentTicket = (currentTicket + 1) % totalTickets), child: Padding(padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 5.0), child: Text('>>', style: TextStyle(fontSize: kIsWeb ? 28 : 38, color: const Color(0xFF080868), fontWeight: FontWeight.w900, letterSpacing: -2))))]), const SizedBox(height: 15), Expanded(child: Table(columnWidths: const { 0: FlexColumnWidth(1.2), 1: FlexColumnWidth(1.0), 2: FlexColumnWidth(1.0), 3: FlexColumnWidth(1.0), 4: FlexColumnWidth(1.0), 5: FlexColumnWidth(1.0), 6: FlexColumnWidth(1.0), 7: FlexColumnWidth(1.0), 8: FlexColumnWidth(1.0) }, defaultVerticalAlignment: TableCellVerticalAlignment.middle, children: [_buildTopHeaderRow(apuestasEnEsteBoleto, aciertosBoletoActual), ...List.generate(14, (index) => _buildBetRow(index + 1, apuestasEnEsteBoleto, startIndex)), _buildBottomHeaderRow(apuestasEnEsteBoleto, startIndex)]))])
     );
@@ -458,7 +480,6 @@ class _BoletoBoxState extends State<BoletoBox> {
       verticalAlignment: TableCellVerticalAlignment.fill, 
       child: Container(
         color: isOdd ? const Color(0xFFFF6347) : Colors.white, 
-        // === SOLUCIÓN: Padding horizontal ampliado a 8.0 para que se vea el rojo en los bordes de la columna ===
         padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: kIsWeb ? 2.5 : 2.5), 
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [_buildSmallSquare('1', isMarked: markedSymbol == '1', isOddColumn: isOdd, resultado: resultadoPartido), _buildSmallSquare('X', isMarked: markedSymbol == 'X', isOddColumn: isOdd, resultado: resultadoPartido), _buildSmallSquare('2', isMarked: markedSymbol == '2', isOddColumn: isOdd, resultado: resultadoPartido)])
       )
@@ -471,7 +492,6 @@ class _BoletoBoxState extends State<BoletoBox> {
     Border? border = isOddColumn ? null : Border.all(color: Colors.redAccent, width: 1.0);
     return Expanded(
       child: Container(
-        // === SOLUCIÓN: Margen horizontal ampliado a 3.5 para separar los signos y ver más rojo ===
         margin: const EdgeInsets.symmetric(horizontal: 3.5, vertical: 1.5), 
         alignment: Alignment.center, 
         decoration: BoxDecoration(color: bgColor, border: border), 
