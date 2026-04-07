@@ -46,10 +46,9 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  final double anchoFijo = 560.0; 
-  // === ÚLTIMO AJUSTE WEB: Ganamos el centímetro bajando un pelín la altura total ===
-  final double altoFijo1 = kIsWeb ? 270.0 : 340.0; 
-  final double altoFijo2 = kIsWeb ? 470.0 : 550.0; 
+  final double anchoFijo = kIsWeb ? 560.0 : 660.0; 
+  final double altoFijo1 = kIsWeb ? 270.0 : 320.0; 
+  final double altoFijo2 = kIsWeb ? 470.0 : 620.0; 
 
   Map<String, dynamic>? jsonData;
   bool isReady = false; 
@@ -68,9 +67,14 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Future<void> _inicializarAppYDescargar() async {
-    setState(() { hasError = false; loadingProgress = 0.1; loadingMessage = "Estableciendo conexión segura con el servidor..."; });
+    // === 1º MEJORA: PANTALLA DE INICIO MÁS LARGA ===
+    // Congelamos la pantalla inicial 2.5 segundos para que se vea el logo
+    setState(() { hasError = false; loadingProgress = 0.05; loadingMessage = "Arrancando motor combinatorio..."; });
+    await Future.delayed(const Duration(milliseconds: 2500)); 
+
     try {
       prefs = await SharedPreferences.getInstance();
+      setState(() { loadingProgress = 0.25; loadingMessage = "Estableciendo conexión segura con el servidor..."; });
       await Future.delayed(const Duration(milliseconds: 800)); 
 
       setState(() { loadingProgress = 0.4; loadingMessage = "Descargando datos de la jornada en curso..."; });
@@ -254,35 +258,26 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget _buildMobileView(BuildContext context, bool esFallos, Widget p1, Widget p2, Widget d1, Widget d2, Widget f1, Widget f2) {
     List<Widget> paginas = [p1, d1]; if (esFallos) paginas.add(f1); paginas.add(p2); paginas.add(d2); if (esFallos) paginas.add(f2);
-    double availableHeight = MediaQuery.of(context).size.height - 20.0;
-    return SingleChildScrollView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0), child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: paginas.map((recuadro) { return Padding(padding: const EdgeInsets.only(right: 15.0), child: SizedBox(height: availableHeight, child: FittedBox(fit: BoxFit.contain, child: recuadro))); }).toList()));
+    double availableHeight = MediaQuery.of(context).size.height - 10.0;
+    return SingleChildScrollView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 5.0), child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: paginas.map((recuadro) { return Padding(padding: const EdgeInsets.only(right: 20.0), child: SizedBox(height: availableHeight, child: FittedBox(fit: BoxFit.contain, child: recuadro))); }).toList()));
   }
 }
 
 // =====================================================================
-// COMPONENTES REUTILIZABLES (AHORA CON PADDING INTELIGENTE)
+// COMPONENTES REUTILIZABLES
 // =====================================================================
 class GridItemContainer extends StatelessWidget {
-  final Widget child; 
-  final double width; 
-  final double? height;
-  final double paddingVertical;   // Control de espacio superior/inferior
-  final double paddingHorizontal; // Control de espacio izquierda/derecha
+  final Widget child; final double width; final double? height;
+  final double paddingVertical; final double paddingHorizontal; 
 
   const GridItemContainer({
-    super.key, 
-    required this.child, 
-    required this.width, 
-    this.height,
-    this.paddingVertical = 12.0,   // Valor por defecto
-    this.paddingHorizontal = 20.0  // Valor por defecto
+    super.key, required this.child, required this.width, this.height,
+    this.paddingVertical = 12.0, this.paddingHorizontal = 20.0 
   });
 
   @override Widget build(BuildContext context) {
     return Container( 
-      width: width, height: height, 
-      margin: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 5.0), 
-      // === APLICAMOS EL PADDING PERSONALIZADO ===
+      width: width, height: height, margin: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 5.0), 
       padding: EdgeInsets.symmetric(vertical: paddingVertical, horizontal: paddingHorizontal), 
       decoration: BoxDecoration(color: const Color.fromRGBO(255, 248, 220, 1), border: Border.all(color: Colors.red, width: 2.5)), 
       child: child
@@ -294,9 +289,12 @@ class PresentationBox extends StatelessWidget {
   final double width; final double height; const PresentationBox({super.key, required this.width, required this.height});
   @override Widget build(BuildContext context) {
     return GridItemContainer(
-      width: width, height: height, 
-      paddingVertical: kIsWeb ? 2.0 : 12.0, // REDUCIMOS PADDING VERTICAL EN WEB (Gana centímetro)
-      child: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [const Text('LA QUINIPLAYA MILLONARIA', textAlign: TextAlign.center, style: TextStyle(fontSize: 26, color: Color.fromRGBO(207, 7, 7, 0.938), fontWeight: FontWeight.bold)), const SizedBox(height: 20), ClipRRect(borderRadius: BorderRadius.circular(8.0), child: Image.asset('assets/dadoqpr.png', height: 100, fit: BoxFit.cover)), const SizedBox(height: 20), const Text('Sistema Combinatorio de Alto Rendimiento para Apuestas Deportivas', textAlign: TextAlign.center, style: TextStyle(fontSize: 16, color: Color(0xFF080868), fontWeight: FontWeight.bold))])
+      width: width, height: height, paddingVertical: kIsWeb ? 2.0 : 8.0, 
+      child: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
+        Text('LA QUINIPLAYA MILLONARIA', textAlign: TextAlign.center, style: TextStyle(fontSize: kIsWeb ? 26 : 30, color: const Color.fromRGBO(207, 7, 7, 0.938), fontWeight: FontWeight.bold)), 
+        const SizedBox(height: 20), ClipRRect(borderRadius: BorderRadius.circular(8.0), child: Image.asset('assets/dadoqpr.png', height: 100, fit: BoxFit.cover)), const SizedBox(height: 20), 
+        Text('Sistema Combinatorio de Alto Rendimiento para Apuestas Deportivas', textAlign: TextAlign.center, style: TextStyle(fontSize: kIsWeb ? 16 : 18, color: const Color(0xFF080868), fontWeight: FontWeight.bold))
+      ])
     );
   }
 }
@@ -307,12 +305,14 @@ class GeneralDataBox extends StatelessWidget {
   @override Widget build(BuildContext context) {
     bool esFallos = datos['tipoJornada'] == 'Fallos';
     return GridItemContainer(
-      width: width, height: height, 
-      paddingVertical: kIsWeb ? 2.0 : 12.0, // REDUCIMOS PADDING VERTICAL EN WEB
-      child: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [const Text('Datos Generales Jornada en Curso', textAlign: TextAlign.center, style: TextStyle(fontSize: 22, color: Color.fromRGBO(207, 7, 7, 0.938), fontWeight: FontWeight.bold)), const SizedBox(height: 15), Table(columnWidths: const { 0: FlexColumnWidth(4.2), 1: FlexColumnWidth(5.8) }, defaultVerticalAlignment: TableCellVerticalAlignment.middle, children: [_buildDataRow('Número Jornada Actual', datos['numeroJornada']), _buildDataRow('Fecha Jornada Actual', datos['fecha']), _buildDataRow(esFallos ? 'Figuras Base Utilizadas' : 'Figuras Utilizadas', datos['figurasBase']), _buildDataRow(esFallos ? 'Apuestas Base Directas' : 'Total Apuestas Directas', datos['apuestasBaseDirectas']), _buildDataRow(esFallos ? 'Apuestas Base Reducidas' : 'Total Apuestas Reducidas', datos['apuestasBaseReducidas']), _buildDataRow(esFallos ? 'Número de Boletos Base' : 'Número de Boletos', datos['numeroBoletosBase']?.toString() ?? '')])])
+      width: width, height: height, paddingVertical: kIsWeb ? 2.0 : 8.0, 
+      child: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
+        Text('Datos Generales Jornada en Curso', textAlign: TextAlign.center, style: TextStyle(fontSize: kIsWeb ? 22 : 24, color: const Color.fromRGBO(207, 7, 7, 0.938), fontWeight: FontWeight.bold)), 
+        const SizedBox(height: 15), Table(columnWidths: const { 0: FlexColumnWidth(4.2), 1: FlexColumnWidth(5.8) }, defaultVerticalAlignment: TableCellVerticalAlignment.middle, children: [_buildDataRow('Número Jornada Actual', datos['numeroJornada']), _buildDataRow('Fecha Jornada Actual', datos['fecha']), _buildDataRow(esFallos ? 'Figuras Base Utilizadas' : 'Figuras Utilizadas', datos['figurasBase']), _buildDataRow(esFallos ? 'Apuestas Base Directas' : 'Total Apuestas Directas', datos['apuestasBaseDirectas']), _buildDataRow(esFallos ? 'Apuestas Base Reducidas' : 'Total Apuestas Reducidas', datos['apuestasBaseReducidas']), _buildDataRow(esFallos ? 'Número de Boletos Base' : 'Número de Boletos', datos['numeroBoletosBase']?.toString() ?? '')])
+      ])
     );
   }
-  TableRow _buildDataRow(String label, String value) { return TableRow(children: [Padding(padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0), child: Text(label, textAlign: TextAlign.right, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 14))), Padding(padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0), child: FittedBox(alignment: Alignment.centerLeft, fit: BoxFit.scaleDown, child: Text(value, textAlign: TextAlign.left, style: const TextStyle(color: Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: 14))))]); }
+  TableRow _buildDataRow(String label, String value) { return TableRow(children: [Padding(padding: EdgeInsets.symmetric(vertical: kIsWeb ? 4.0 : 3.0, horizontal: 8.0), child: Text(label, textAlign: TextAlign.right, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: kIsWeb ? 14 : 16))), Padding(padding: EdgeInsets.symmetric(vertical: kIsWeb ? 4.0 : 3.0, horizontal: 8.0), child: FittedBox(alignment: Alignment.centerLeft, fit: BoxFit.scaleDown, child: Text(value, textAlign: TextAlign.left, style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 14 : 16))))]); }
 }
 
 class FallosDataBox extends StatelessWidget {
@@ -320,12 +320,14 @@ class FallosDataBox extends StatelessWidget {
   const FallosDataBox({super.key, required this.width, required this.height, required this.datos});
   @override Widget build(BuildContext context) {
     return GridItemContainer(
-      width: width, height: height, 
-      paddingVertical: kIsWeb ? 2.0 : 12.0, // REDUCIMOS PADDING VERTICAL EN WEB
-      child: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [const Text('Datos Adicionales Sistema de Fallos', textAlign: TextAlign.center, style: TextStyle(fontSize: 22, color: Color.fromRGBO(207, 7, 7, 0.938), fontWeight: FontWeight.bold)), const SizedBox(height: 15), Table(columnWidths: const { 0: FlexColumnWidth(4.2), 1: FlexColumnWidth(5.8) }, defaultVerticalAlignment: TableCellVerticalAlignment.middle, children: [_buildDataRow('Número de Variantes', datos['numeroVariantes']?.toString() ?? ''), _buildDataRow('Apuestas Directas Cubiertas', datos['apuestasDirectasCubiertas']?.toString() ?? ''), _buildDataRow('Total Figuras Globales', datos['totalFigurasGlobales'] ?? ''), _buildDataRow('Apuestas Directas Fallos', datos['apuestasDirectasFallos'] ?? ''), _buildDataRow('Apuestas Reducidas Fallos', datos['apuestasReducidasFallos'] ?? ''), _buildDataRow('Número de Boletos con Fallo', datos['numeroBoletosFallo']?.toString() ?? '')])])
+      width: width, height: height, paddingVertical: kIsWeb ? 2.0 : 8.0, 
+      child: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
+        Text('Datos Adicionales Sistema de Fallos', textAlign: TextAlign.center, style: TextStyle(fontSize: kIsWeb ? 22 : 24, color: const Color.fromRGBO(207, 7, 7, 0.938), fontWeight: FontWeight.bold)), 
+        const SizedBox(height: 15), Table(columnWidths: const { 0: FlexColumnWidth(4.2), 1: FlexColumnWidth(5.8) }, defaultVerticalAlignment: TableCellVerticalAlignment.middle, children: [_buildDataRow('Número de Variantes', datos['numeroVariantes']?.toString() ?? ''), _buildDataRow('Apuestas Directas Cubiertas', datos['apuestasDirectasCubiertas']?.toString() ?? ''), _buildDataRow('Total Figuras Globales', datos['totalFigurasGlobales'] ?? ''), _buildDataRow('Apuestas Directas Fallos', datos['apuestasDirectasFallos'] ?? ''), _buildDataRow('Apuestas Reducidas Fallos', datos['apuestasReducidasFallos'] ?? ''), _buildDataRow('Número de Boletos con Fallo', datos['numeroBoletosFallo']?.toString() ?? '')])
+      ])
     );
   }
-  TableRow _buildDataRow(String label, String value) { return TableRow(children: [Padding(padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0), child: Text(label, textAlign: TextAlign.right, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 14))), Padding(padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0), child: FittedBox(alignment: Alignment.centerLeft, fit: BoxFit.scaleDown, child: Text(value, textAlign: TextAlign.left, style: const TextStyle(color: Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: 14))))]); }
+  TableRow _buildDataRow(String label, String value) { return TableRow(children: [Padding(padding: EdgeInsets.symmetric(vertical: kIsWeb ? 4.0 : 3.0, horizontal: 8.0), child: Text(label, textAlign: TextAlign.right, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: kIsWeb ? 14 : 16))), Padding(padding: EdgeInsets.symmetric(vertical: kIsWeb ? 4.0 : 3.0, horizontal: 8.0), child: FittedBox(alignment: Alignment.centerLeft, fit: BoxFit.scaleDown, child: Text(value, textAlign: TextAlign.left, style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 14 : 16))))]); }
 }
 
 class PronosticosBox extends StatelessWidget {
@@ -343,12 +345,13 @@ class PronosticosBox extends StatelessWidget {
     }
 
     return GridItemContainer(
-      width: width, height: height, 
-      paddingHorizontal: kIsWeb ? 35.0 : 20.0, // AUMENTAMOS PADDING HORIZONTAL EN WEB
+      // === 3º MEJORA: PADDING LATERAL PASA A 50.0 ===
+      width: width, height: height, paddingHorizontal: kIsWeb ? 35.0 : 50.0, paddingVertical: kIsWeb ? 2.0 : 12.0,
       child: Column(children: [
-      const Text('Pronósticos Resultados Escrutinio', textAlign: TextAlign.center, style: TextStyle(fontSize: 22, color: Color.fromRGBO(207, 7, 7, 0.938), fontWeight: FontWeight.bold)), 
+      Text('Pronósticos Resultados Escrutinio', textAlign: TextAlign.center, style: TextStyle(fontSize: kIsWeb ? 22 : 28, color: const Color.fromRGBO(207, 7, 7, 0.938), fontWeight: FontWeight.bold)), 
       const SizedBox(height: 5),
-      Expanded(child: Table(columnWidths: const { 0: FlexColumnWidth(4.5), 1: FlexColumnWidth(1.8), 2: FlexColumnWidth(1.2), 3: FlexColumnWidth(2.5) }, defaultVerticalAlignment: TableCellVerticalAlignment.middle, children: [const TableRow(children: [SizedBox(height: 8), SizedBox(height: 8), SizedBox(height: 8), SizedBox(height: 8)]), ...List.generate(14, (index) => _buildPartidoRow(index, index < partidos.length ? partidos[index] : "Partido ${index+1}")), TableRow(children: [const SizedBox(height: 15), Container(height: kIsWeb ? 22 : 24, alignment: Alignment.center, decoration: BoxDecoration(color: Colors.amber, border: Border.all(color: const Color(0xFF080868), width: 1)), child: Text("$totalAciertosPronostico Oros", style: const TextStyle(color: Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: 12))), const SizedBox(height: 15), Padding(padding: const EdgeInsets.only(left: 8.0), child: Row(children: [Expanded(child: _buildBadge('0', isBlue: true)), const SizedBox(width: 4), Expanded(child: _buildBadge(recuentoGlobal[0].toString(), isBlue: false))]))])]))])
+      // === 2º MEJORA: TABLA REAJUSTADA PARA ENSANCHAR EL DROPDOWN ===
+      Expanded(child: Table(columnWidths: const { 0: FlexColumnWidth(4.2), 1: FlexColumnWidth(1.8), 2: FlexColumnWidth(1.8), 3: FlexColumnWidth(2.2) }, defaultVerticalAlignment: TableCellVerticalAlignment.middle, children: [const TableRow(children: [SizedBox(height: 8), SizedBox(height: 8), SizedBox(height: 8), SizedBox(height: 8)]), ...List.generate(14, (index) => _buildPartidoRow(index, index < partidos.length ? partidos[index] : "Partido ${index+1}")), TableRow(children: [const SizedBox(height: 15), Container(height: kIsWeb ? 22 : 32, alignment: Alignment.center, decoration: BoxDecoration(color: Colors.amber, border: Border.all(color: const Color(0xFF080868), width: 1)), child: Text("$totalAciertosPronostico Oros", style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 12 : 18))), const SizedBox(height: 15), Padding(padding: const EdgeInsets.only(left: 8.0), child: Row(children: [Expanded(child: _buildBadge('0', isBlue: true)), const SizedBox(width: 4), Expanded(child: _buildBadge(recuentoGlobal[0].toString(), isBlue: false))]))])]))])
     );
   }
 
@@ -356,9 +359,9 @@ class PronosticosBox extends StatelessWidget {
     String nombrePartido = "${(index + 1).toString().padLeft(2, '0')}. $partido"; String pBase = index < pronosticosBase.length ? pronosticosBase[index].padRight(3, ' ') : "   "; String pFallo = index < pronosticosFallos.length ? pronosticosFallos[index].padRight(3, ' ') : "   "; String resultado = resultados[index]; int categoria = 14 - index; 
 
     return TableRow(children: [
-      Padding(padding: const EdgeInsets.symmetric(vertical: 3.5).copyWith(right: 12.0), child: Text(nombrePartido, style: const TextStyle(color: Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: 13))), 
+      Padding(padding: EdgeInsets.symmetric(vertical: kIsWeb ? 3.5 : 3.5).copyWith(right: 12.0), child: Text(nombrePartido, style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 13 : 19))), 
       TableCell(verticalAlignment: TableCellVerticalAlignment.fill, child: Container(decoration: BoxDecoration(color: Colors.redAccent, border: Border.all(color: Colors.redAccent, width: 0.5)), padding: const EdgeInsets.symmetric(horizontal: 4.0), child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [Expanded(child: _buildSignoDin('1', pBase[0], pFallo[0], resultado)), Expanded(child: _buildSignoDin('X', pBase[1], pFallo[1], resultado)), Expanded(child: _buildSignoDin('2', pBase[2], pFallo[2], resultado))]))), 
-      Padding(padding: const EdgeInsets.only(left: 12.0, right: 12.0), child: Container(height: kIsWeb ? 24 : 30, padding: const EdgeInsets.symmetric(horizontal: 4.0), decoration: BoxDecoration(color: Colors.amber, borderRadius: BorderRadius.circular(6.0), border: Border.all(color: Colors.black, width: 1.0)), child: DropdownButtonHideUnderline(child: DropdownButton<String>(value: resultado, isExpanded: true, isDense: true, icon: const Icon(Icons.keyboard_arrow_down, color: Colors.black, size: 18), dropdownColor: Colors.white, borderRadius: BorderRadius.circular(12.0), alignment: Alignment.center, style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 12 : 14), items: const [DropdownMenuItem(value: '0', alignment: Alignment.center, child: Text(' ')), DropdownMenuItem(value: '1', alignment: Alignment.center, child: Text('1')), DropdownMenuItem(value: 'X', alignment: Alignment.center, child: Text('X')), DropdownMenuItem(value: '2', alignment: Alignment.center, child: Text('2'))], onChanged: (val) { if (val != null) onResultadoChanged(index, val); })))), 
+      Padding(padding: const EdgeInsets.only(left: 12.0, right: 12.0), child: Container(height: kIsWeb ? 24 : 36, padding: const EdgeInsets.symmetric(horizontal: 4.0), decoration: BoxDecoration(color: Colors.amber, borderRadius: BorderRadius.circular(6.0), border: Border.all(color: Colors.black, width: 1.0)), child: DropdownButtonHideUnderline(child: DropdownButton<String>(value: resultado, isExpanded: true, isDense: true, icon: Icon(Icons.keyboard_arrow_down, color: Colors.black, size: kIsWeb ? 18 : 26), dropdownColor: Colors.white, borderRadius: BorderRadius.circular(12.0), alignment: Alignment.center, style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 12 : 19), items: const [DropdownMenuItem(value: '0', alignment: Alignment.center, child: Text(' ')), DropdownMenuItem(value: '1', alignment: Alignment.center, child: Text('1')), DropdownMenuItem(value: 'X', alignment: Alignment.center, child: Text('X')), DropdownMenuItem(value: '2', alignment: Alignment.center, child: Text('2'))], onChanged: (val) { if (val != null) onResultadoChanged(index, val); })))), 
       Padding(padding: const EdgeInsets.only(left: 8.0), child: Row(children: [Expanded(child: _buildBadge(categoria.toString(), isBlue: true)), const SizedBox(width: 4), Expanded(child: _buildBadge(recuentoGlobal[categoria].toString(), isBlue: false))]))]);
   }
 
@@ -366,10 +369,10 @@ class PronosticosBox extends StatelessWidget {
     bool isFallo = charFallo != ' '; bool isBase = charBase != ' '; bool isJugado = isFallo || isBase; bool isResultado = (resultado == texto);
     Color bgColor = Colors.white; Color textColor = isJugado ? const Color(0xFF080868) : const Color.fromRGBO(255, 180, 180, 1);
     if (resultado == '0') { if (isFallo) bgColor = const Color(0xFF6CF114); else if (isBase) bgColor = const Color(0xFF21F0F0); } else { if (isResultado) { if (isJugado) { bgColor = Colors.amber; textColor = const Color(0xFF080868); } else { bgColor = Colors.grey.shade400; textColor = const Color(0xFF080868); } } else { if (isJugado) { bgColor = Colors.redAccent; textColor = Colors.white; } else { bgColor = Colors.white; } } }
-    return Container(height: kIsWeb ? 20 : 24, margin: const EdgeInsets.symmetric(horizontal: 1.5), alignment: Alignment.center, decoration: BoxDecoration(color: bgColor), child: Text(texto, textAlign: TextAlign.center, style: TextStyle(color: textColor, fontWeight: isJugado ? FontWeight.bold : FontWeight.normal, fontSize: kIsWeb ? 11 : 14)));
+    return Container(height: kIsWeb ? 20 : 30, margin: const EdgeInsets.symmetric(horizontal: 1.5), alignment: Alignment.center, decoration: BoxDecoration(color: bgColor), child: Text(texto, textAlign: TextAlign.center, style: TextStyle(color: textColor, fontWeight: isJugado ? FontWeight.bold : FontWeight.normal, fontSize: kIsWeb ? 11 : 18)));
   }
 
-  Widget _buildBadge(String texto, {required bool isBlue}) { return Container(height: kIsWeb ? 22 : 26, alignment: Alignment.center, decoration: BoxDecoration(color: isBlue ? const Color.fromRGBO(33, 240, 240, 0.8) : Colors.white, border: Border.all(color: const Color(0xFF080868), width: 1.5)), child: Text(texto, style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 11 : 13))); }
+  Widget _buildBadge(String texto, {required bool isBlue}) { return Container(height: kIsWeb ? 22 : 32, alignment: Alignment.center, decoration: BoxDecoration(color: isBlue ? const Color.fromRGBO(33, 240, 240, 0.8) : Colors.white, border: Border.all(color: const Color(0xFF080868), width: 1.5)), child: Text(texto, style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 11 : 18))); }
 }
 
 class BoletoBox extends StatefulWidget {
@@ -387,23 +390,23 @@ class _BoletoBoxState extends State<BoletoBox> {
     List<int> aciertosBoletoActual = [];
     for (int i = 0; i < apuestasEnEsteBoleto; i++) { String apuesta = widget.apuestas[startIndex + i]; int count = 0; for (int r = 0; r < 14; r++) { if (widget.resultados[r] != '0' && r < apuesta.length && apuesta[r] == widget.resultados[r]) count++; } aciertosBoletoActual.add(count); }
     return GridItemContainer(
-      width: widget.width, height: widget.height, 
-      paddingHorizontal: kIsWeb ? 35.0 : 20.0, // AUMENTAMOS PADDING HORIZONTAL EN WEB
-      child: Column(children: [Row(children: [GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => currentTicket = (currentTicket - 1 + totalTickets) % totalTickets), child: const Padding(padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 5.0), child: Text('<<', style: TextStyle(fontSize: 28, color: Color(0xFF080868), fontWeight: FontWeight.w900, letterSpacing: -2)))), const Spacer(), Text(widget.titulo, style: const TextStyle(fontSize: 22, color: Color.fromRGBO(207, 7, 7, 0.938), fontWeight: FontWeight.bold)), const Spacer(), GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => currentTicket = (currentTicket + 1) % totalTickets), child: const Padding(padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 5.0), child: Text('>>', style: TextStyle(fontSize: 28, color: Color(0xFF080868), fontWeight: FontWeight.w900, letterSpacing: -2))))]), const SizedBox(height: 15), Expanded(child: Table(columnWidths: const { 0: FlexColumnWidth(1.2), 1: FlexColumnWidth(1.0), 2: FlexColumnWidth(1.0), 3: FlexColumnWidth(1.0), 4: FlexColumnWidth(1.0), 5: FlexColumnWidth(1.0), 6: FlexColumnWidth(1.0), 7: FlexColumnWidth(1.0), 8: FlexColumnWidth(1.0) }, defaultVerticalAlignment: TableCellVerticalAlignment.middle, children: [_buildTopHeaderRow(apuestasEnEsteBoleto, aciertosBoletoActual), ...List.generate(14, (index) => _buildBetRow(index + 1, apuestasEnEsteBoleto, startIndex)), _buildBottomHeaderRow(apuestasEnEsteBoleto, startIndex)]))])
+      // === 3º MEJORA: PADDING LATERAL PASA A 50.0 ===
+      width: widget.width, height: widget.height, paddingHorizontal: kIsWeb ? 35.0 : 50.0, paddingVertical: kIsWeb ? 2.0 : 12.0,
+      child: Column(children: [Row(children: [GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => currentTicket = (currentTicket - 1 + totalTickets) % totalTickets), child: Padding(padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 5.0), child: Text('<<', style: TextStyle(fontSize: kIsWeb ? 28 : 38, color: const Color(0xFF080868), fontWeight: FontWeight.w900, letterSpacing: -2)))), const Spacer(), Text(widget.titulo, style: TextStyle(fontSize: kIsWeb ? 22 : 28, color: const Color.fromRGBO(207, 7, 7, 0.938), fontWeight: FontWeight.bold)), const Spacer(), GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => currentTicket = (currentTicket + 1) % totalTickets), child: Padding(padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 5.0), child: Text('>>', style: TextStyle(fontSize: kIsWeb ? 28 : 38, color: const Color(0xFF080868), fontWeight: FontWeight.w900, letterSpacing: -2))))]), const SizedBox(height: 15), Expanded(child: Table(columnWidths: const { 0: FlexColumnWidth(1.2), 1: FlexColumnWidth(1.0), 2: FlexColumnWidth(1.0), 3: FlexColumnWidth(1.0), 4: FlexColumnWidth(1.0), 5: FlexColumnWidth(1.0), 6: FlexColumnWidth(1.0), 7: FlexColumnWidth(1.0), 8: FlexColumnWidth(1.0) }, defaultVerticalAlignment: TableCellVerticalAlignment.middle, children: [_buildTopHeaderRow(apuestasEnEsteBoleto, aciertosBoletoActual), ...List.generate(14, (index) => _buildBetRow(index + 1, apuestasEnEsteBoleto, startIndex)), _buildBottomHeaderRow(apuestasEnEsteBoleto, startIndex)]))])
     );
   }
 
-  TableRow _buildTopHeaderRow(int numApuestas, List<int> aciertos) { return TableRow(children: [_buildHeaderText('B${currentTicket + 1}'), ...List.generate(8, (index) { if (index >= numApuestas) return _buildHeaderText(''); int count = aciertos[index]; return Container(height: kIsWeb ? 22 : 26, alignment: Alignment.center, color: count > 9 ? Colors.yellow : Colors.transparent, child: Text(count.toString(), style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 12 : 14))); })]); }
+  TableRow _buildTopHeaderRow(int numApuestas, List<int> aciertos) { return TableRow(children: [_buildHeaderText('B${currentTicket + 1}'), ...List.generate(8, (index) { if (index >= numApuestas) return _buildHeaderText(''); int count = aciertos[index]; return Container(height: kIsWeb ? 22 : 32, alignment: Alignment.center, color: count > 9 ? Colors.yellow : Colors.transparent, child: Text(count.toString(), style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 12 : 19))); })]); }
   TableRow _buildBetRow(int rowNum, int numApuestas, int startIdx) { String resultadoPartido = widget.resultados[rowNum - 1]; return TableRow(children: [_buildHeaderText(rowNum.toString()), ...List.generate(8, (colIndex) { if (colIndex >= numApuestas) return const SizedBox(); int betNum = startIdx + colIndex + 1; bool isOdd = betNum % 2 != 0; String apuestaCompleta = widget.apuestas[startIdx + colIndex]; String mark = ' '; if(apuestaCompleta.length >= rowNum) mark = apuestaCompleta[rowNum - 1]; return _buildBetCell(isOdd: isOdd, markedSymbol: mark, resultadoPartido: resultadoPartido); })]); }
   TableRow _buildBottomHeaderRow(int numApuestas, int startIdx) { return TableRow(children: [_buildHeaderText('apu.'), ...List.generate(8, (index) => _buildHeaderText(index < numApuestas ? (startIdx + index + 1).toString() : ''))]); }
-  Widget _buildHeaderText(String text) { return Container(height: kIsWeb ? 22 : 26, alignment: Alignment.center, child: Text(text, style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 12 : 14))); }
+  Widget _buildHeaderText(String text) { return Container(height: kIsWeb ? 22 : 32, alignment: Alignment.center, child: Text(text, style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 12 : 19))); }
   
-  Widget _buildBetCell({required bool isOdd, required String markedSymbol, required String resultadoPartido}) { return TableCell(verticalAlignment: TableCellVerticalAlignment.fill, child: Container(color: isOdd ? Color(0xFFFF6347) : Colors.white, padding: const EdgeInsets.symmetric(horizontal: 2.0, vertical: 2.5), child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [_buildSmallSquare('1', isMarked: markedSymbol == '1', isOddColumn: isOdd, resultado: resultadoPartido), _buildSmallSquare('X', isMarked: markedSymbol == 'X', isOddColumn: isOdd, resultado: resultadoPartido), _buildSmallSquare('2', isMarked: markedSymbol == '2', isOddColumn: isOdd, resultado: resultadoPartido)]))); }
+  Widget _buildBetCell({required bool isOdd, required String markedSymbol, required String resultadoPartido}) { return TableCell(verticalAlignment: TableCellVerticalAlignment.fill, child: Container(color: isOdd ? const Color(0xFFFF6347) : Colors.white, padding: EdgeInsets.symmetric(horizontal: 2.0, vertical: kIsWeb ? 2.5 : 3.5), child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [_buildSmallSquare('1', isMarked: markedSymbol == '1', isOddColumn: isOdd, resultado: resultadoPartido), _buildSmallSquare('X', isMarked: markedSymbol == 'X', isOddColumn: isOdd, resultado: resultadoPartido), _buildSmallSquare('2', isMarked: markedSymbol == '2', isOddColumn: isOdd, resultado: resultadoPartido)]))); }
 
   Widget _buildSmallSquare(String text, {required bool isMarked, required bool isOddColumn, required String resultado}) {
     bool isResultado = (resultado == text); Color bgColor = Colors.white; Color textColor = isMarked ? const Color(0xFF080868) : const Color.fromRGBO(255, 180, 180, 1);
     if (resultado == '0') { if (isMarked) bgColor = const Color.fromRGBO(33, 240, 240, 1.0); } else { if (isResultado) { if (isMarked) { bgColor = Colors.amber; textColor = const Color(0xFF080868); } else { bgColor = Colors.grey.shade400; textColor = const Color(0xFF080868); } } else { if (isMarked) { bgColor = Colors.redAccent; textColor = Colors.white; } else { bgColor = Colors.white; } } }
     Border? border = isOddColumn ? null : Border.all(color: Colors.redAccent, width: 1.0);
-    return Expanded(child: Container(margin: const EdgeInsets.symmetric(horizontal: 1.5), alignment: Alignment.center, decoration: BoxDecoration(color: bgColor, border: border), child: Text(text, style: TextStyle(color: textColor, fontWeight: isMarked ? FontWeight.bold : FontWeight.normal, fontSize: kIsWeb ? 11 : 12))));
+    return Expanded(child: Container(margin: const EdgeInsets.symmetric(horizontal: 1.5), alignment: Alignment.center, decoration: BoxDecoration(color: bgColor, border: border), child: Text(text, style: TextStyle(color: textColor, fontWeight: isMarked ? FontWeight.bold : FontWeight.normal, fontSize: kIsWeb ? 11 : 18))));
   }
 }
