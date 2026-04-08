@@ -46,10 +46,10 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  // === TAMAÑOS MAESTROS ===
   final double anchoFijo = kIsWeb ? 560.0 : 720.0; 
   final double altoFijo1 = kIsWeb ? 270.0 : 320.0; 
-  final double altoFijo2 = kIsWeb ? 470.0 : 610.0; 
+  // === AJUSTE: Lienzo a 620 para dar margen de seguridad al Escrutinio ===
+  final double altoFijo2 = kIsWeb ? 470.0 : 620.0; 
 
   Map<String, dynamic>? jsonData;
   bool isReady = false; 
@@ -372,28 +372,38 @@ class PronosticosBox extends StatelessWidget {
     return GridItemContainer(
       width: width, height: height, paddingHorizontal: kIsWeb ? 35.0 : 15.0, paddingVertical: kIsWeb ? 2.0 : 6.0,
       child: Column(children: [
-      Text('Pronósticos Resultados Escrutinio', textAlign: TextAlign.center, style: TextStyle(fontSize: kIsWeb ? 22 : 28, color: const Color.fromRGBO(207, 7, 7, 0.938), fontWeight: FontWeight.bold)), 
+      Text('Pronósticos Resultados Escrutinio', textAlign: TextAlign.center, style: TextStyle(fontSize: kIsWeb ? 22 : 26, color: const Color.fromRGBO(207, 7, 7, 0.938), fontWeight: FontWeight.bold)), 
       const SizedBox(height: 2), 
-      Expanded(child: Table(columnWidths: const { 0: FlexColumnWidth(4.5), 1: FlexColumnWidth(2.0), 2: FlexColumnWidth(2.0), 3: FlexColumnWidth(2.5) }, defaultVerticalAlignment: TableCellVerticalAlignment.middle, 
+      Expanded(child: Table(columnWidths: const { 0: FlexColumnWidth(4.3), 1: FlexColumnWidth(2.4), 2: FlexColumnWidth(1.9), 3: FlexColumnWidth(2.4) }, defaultVerticalAlignment: TableCellVerticalAlignment.middle, 
         children: [
-          const TableRow(children: [SizedBox(height: 4), SizedBox(height: 4), SizedBox(height: 4), SizedBox(height: 4)]), 
+          // === SOLUCIÓN: Interlineado mínimo (2.0) ===
+          const TableRow(children: [SizedBox(height: 2.0), SizedBox(height: 2.0), SizedBox(height: 2.0), SizedBox(height: 2.0)]), 
           ...List.generate(14, (index) => _buildPartidoRow(index, index < partidos.length ? partidos[index] : "Partido ${index+1}")), 
-          const TableRow(children: [SizedBox(height: 4), SizedBox(height: 4), SizedBox(height: 4), SizedBox(height: 4)]),
+          const TableRow(children: [SizedBox(height: 2.0), SizedBox(height: 2.0), SizedBox(height: 2.0), SizedBox(height: 2.0)]),
           TableRow(children: [
             const SizedBox(), 
+            // === SOLUCIÓN: Oros rebajado a 26 y letra 16 ===
             Container(
-              height: kIsWeb ? 22 : 28, 
+              height: kIsWeb ? 22 : 26, 
               alignment: Alignment.center, 
               margin: const EdgeInsets.symmetric(horizontal: 5.0),
               padding: const EdgeInsets.symmetric(horizontal: 2.0),
               decoration: BoxDecoration(color: Colors.amber, border: Border.all(color: const Color(0xFF080868), width: 1)), 
               child: FittedBox(
                 fit: BoxFit.scaleDown, 
-                child: Text("$totalAciertosPronostico Oros", style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 12 : 17))
+                child: Text("$totalAciertosPronostico Oros", style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 12 : 16))
               )
             ), 
             const SizedBox(), 
-            Padding(padding: const EdgeInsets.only(left: 15.0), child: Row(children: [Expanded(child: _buildBadge('0', isBlue: true, customHeight: kIsWeb ? 22 : 28, customFontSize: kIsWeb ? 11 : 17)), const SizedBox(width: 4), Expanded(child: _buildBadge(recuentoGlobal[0].toString(), isBlue: false, customHeight: kIsWeb ? 22 : 28, customFontSize: kIsWeb ? 11 : 17))]))
+            Padding(
+              padding: const EdgeInsets.only(left: 15.0), 
+              child: Row(children: [
+                // === SOLUCIÓN: Badges finales rebajados a 28 y letra 17 ===
+                Expanded(child: _buildBadge('0', isBlue: true, customHeight: kIsWeb ? 22 : 28, customFontSize: kIsWeb ? 11 : 17)), 
+                const SizedBox(width: 4), 
+                Expanded(child: _buildBadge(recuentoGlobal[0].toString(), isBlue: false, customHeight: kIsWeb ? 22 : 28, customFontSize: kIsWeb ? 11 : 17))
+              ])
+            )
           ])
         ]))])
     );
@@ -404,15 +414,17 @@ class PronosticosBox extends StatelessWidget {
 
     return TableRow(children: [
       Padding(
-        padding: EdgeInsets.symmetric(vertical: kIsWeb ? 3.5 : 4.0).copyWith(right: 25.0), 
+        // === SOLUCIÓN: Menos padding vertical para comprimir filas (De 3.5 a 2.0) ===
+        padding: EdgeInsets.symmetric(vertical: kIsWeb ? 3.5 : 2.0).copyWith(right: 25.0), 
         child: FittedBox(
           alignment: Alignment.centerLeft,
           fit: BoxFit.scaleDown,
-          child: Text(nombrePartido, style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 13 : 20))
+          child: Text(nombrePartido, style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 13 : 18))
         )
       ), 
       TableCell(verticalAlignment: TableCellVerticalAlignment.fill, child: Container(margin: const EdgeInsets.symmetric(horizontal: 5.0), decoration: BoxDecoration(color: Colors.redAccent, border: Border.all(color: Colors.redAccent, width: 0.5)), padding: const EdgeInsets.symmetric(horizontal: 4.0), child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [Expanded(child: _buildSignoDin('1', pBase[0], pFallo[0], resultado)), Expanded(child: _buildSignoDin('X', pBase[1], pFallo[1], resultado)), Expanded(child: _buildSignoDin('2', pBase[2], pFallo[2], resultado))]))), 
-      Padding(padding: const EdgeInsets.symmetric(horizontal: 10.0), child: Container(height: kIsWeb ? 24 : 36, padding: const EdgeInsets.symmetric(horizontal: 4.0), decoration: BoxDecoration(color: Colors.amber, borderRadius: BorderRadius.circular(6.0), border: Border.all(color: Colors.black, width: 1.0)), child: DropdownButtonHideUnderline(child: DropdownButton<String>(value: resultado, isExpanded: true, isDense: true, icon: Icon(Icons.keyboard_arrow_down, color: Colors.black, size: kIsWeb ? 18 : 28), dropdownColor: Colors.white, borderRadius: BorderRadius.circular(12.0), alignment: Alignment.center, style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 12 : 20), items: const [DropdownMenuItem(value: '0', alignment: Alignment.center, child: Text(' ')), DropdownMenuItem(value: '1', alignment: Alignment.center, child: Text('1')), DropdownMenuItem(value: 'X', alignment: Alignment.center, child: Text('X')), DropdownMenuItem(value: '2', alignment: Alignment.center, child: Text('2'))], onChanged: (val) { if (val != null) onResultadoChanged(index, val); })))), 
+      // === SOLUCIÓN: Altura de Dropdown de 34 a 30 ===
+      Padding(padding: const EdgeInsets.symmetric(horizontal: 10.0), child: Container(height: kIsWeb ? 24 : 30, padding: const EdgeInsets.symmetric(horizontal: 4.0), decoration: BoxDecoration(color: Colors.amber, borderRadius: BorderRadius.circular(6.0), border: Border.all(color: Colors.black, width: 1.0)), child: DropdownButtonHideUnderline(child: DropdownButton<String>(value: resultado, isExpanded: true, isDense: true, icon: Icon(Icons.keyboard_arrow_down, color: Colors.black, size: kIsWeb ? 18 : 24), dropdownColor: Colors.white, borderRadius: BorderRadius.circular(12.0), alignment: Alignment.center, style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 12 : 18), items: const [DropdownMenuItem(value: '0', alignment: Alignment.center, child: Text(' ')), DropdownMenuItem(value: '1', alignment: Alignment.center, child: Text('1')), DropdownMenuItem(value: 'X', alignment: Alignment.center, child: Text('X')), DropdownMenuItem(value: '2', alignment: Alignment.center, child: Text('2'))], onChanged: (val) { if (val != null) onResultadoChanged(index, val); })))), 
       Padding(padding: const EdgeInsets.only(left: 15.0), child: Row(children: [Expanded(child: _buildBadge(categoria.toString(), isBlue: true)), const SizedBox(width: 4), Expanded(child: _buildBadge(recuentoGlobal[categoria].toString(), isBlue: false))]))]);
   }
 
@@ -421,16 +433,18 @@ class PronosticosBox extends StatelessWidget {
     Color bgColor = Colors.white; Color textColor = isJugado ? const Color(0xFF080868) : const Color.fromRGBO(255, 180, 180, 1);
     if (resultado == '0') { if (isFallo) bgColor = const Color(0xFF6CF114); else if (isBase) bgColor = const Color(0xFF21F0F0); } else { if (isResultado) { if (isJugado) { bgColor = Colors.amber; textColor = const Color(0xFF080868); } else { bgColor = Colors.grey.shade400; textColor = const Color(0xFF080868); } } else { if (isJugado) { bgColor = Colors.redAccent; textColor = Colors.white; } else { bgColor = Colors.white; } } }
     return Container(
-      height: kIsWeb ? 20 : 30, 
+      // === SOLUCIÓN: Altura de Signos de 30 a 26 ===
+      height: kIsWeb ? 20 : 26, 
       margin: const EdgeInsets.symmetric(horizontal: 3.5), 
       alignment: Alignment.center, 
       decoration: BoxDecoration(color: bgColor), 
-      child: Text(texto, textAlign: TextAlign.center, style: TextStyle(color: textColor, fontWeight: isJugado ? FontWeight.bold : FontWeight.normal, fontSize: kIsWeb ? 11 : 19))
+      child: Text(texto, textAlign: TextAlign.center, style: TextStyle(color: textColor, fontWeight: isJugado ? FontWeight.bold : FontWeight.normal, fontSize: kIsWeb ? 11 : 17))
     );
   }
 
   Widget _buildBadge(String texto, {required bool isBlue, double? customHeight, double? customFontSize}) { 
-    return Container(height: customHeight ?? (kIsWeb ? 22 : 32), alignment: Alignment.center, decoration: BoxDecoration(color: isBlue ? const Color.fromRGBO(33, 240, 240, 0.8) : Colors.white, border: Border.all(color: const Color(0xFF080868), width: 1.5)), child: Text(texto, style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: customFontSize ?? (kIsWeb ? 11 : 19)))); 
+    // === SOLUCIÓN: Altura de Badges de 32 a 28 ===
+    return Container(height: customHeight ?? (kIsWeb ? 22 : 28), alignment: Alignment.center, decoration: BoxDecoration(color: isBlue ? const Color.fromRGBO(33, 240, 240, 0.8) : Colors.white, border: Border.all(color: const Color(0xFF080868), width: 1.5)), child: Text(texto, style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: customFontSize ?? (kIsWeb ? 11 : 18)))); 
   }
 }
 
@@ -454,17 +468,19 @@ class _BoletoBoxState extends State<BoletoBox> {
     );
   }
 
-  TableRow _buildTopHeaderRow(int numApuestas, List<int> aciertos) { return TableRow(children: [_buildHeaderText('B${currentTicket + 1}'), ...List.generate(8, (index) { if (index >= numApuestas) return _buildHeaderText(''); int count = aciertos[index]; return Container(height: kIsWeb ? 22 : 32, alignment: Alignment.center, color: count > 9 ? Colors.yellow : Colors.transparent, child: Text(count.toString(), style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 12 : 20))); })]); }
+  // === SOLUCIÓN: Cabeceras rebajadas en altura (28) para que el carrusel no colapse hacia abajo ===
+  TableRow _buildTopHeaderRow(int numApuestas, List<int> aciertos) { return TableRow(children: [_buildHeaderText('B${currentTicket + 1}'), ...List.generate(8, (index) { if (index >= numApuestas) return _buildHeaderText(''); int count = aciertos[index]; return Container(height: kIsWeb ? 22 : 28, alignment: Alignment.center, color: count > 9 ? Colors.yellow : Colors.transparent, child: Text(count.toString(), style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 12 : 18))); })]); }
   TableRow _buildBetRow(int rowNum, int numApuestas, int startIdx) { String resultadoPartido = widget.resultados[rowNum - 1]; return TableRow(children: [_buildHeaderText(rowNum.toString()), ...List.generate(8, (colIndex) { if (colIndex >= numApuestas) return const SizedBox(); int betNum = startIdx + colIndex + 1; bool isOdd = betNum % 2 != 0; String apuestaCompleta = widget.apuestas[startIdx + colIndex]; String mark = ' '; if(apuestaCompleta.length >= rowNum) mark = apuestaCompleta[rowNum - 1]; return _buildBetCell(isOdd: isOdd, markedSymbol: mark, resultadoPartido: resultadoPartido); })]); }
   TableRow _buildBottomHeaderRow(int numApuestas, int startIdx) { return TableRow(children: [_buildHeaderText('apu.'), ...List.generate(8, (index) => _buildHeaderText(index < numApuestas ? (startIdx + index + 1).toString() : ''))]); }
-  Widget _buildHeaderText(String text) { return Container(height: kIsWeb ? 22 : 32, alignment: Alignment.center, child: Text(text, style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 12 : 20))); }
+  Widget _buildHeaderText(String text) { return Container(height: kIsWeb ? 22 : 28, alignment: Alignment.center, child: Text(text, style: TextStyle(color: const Color(0xFF080868), fontWeight: FontWeight.bold, fontSize: kIsWeb ? 12 : 18))); }
   
   Widget _buildBetCell({required bool isOdd, required String markedSymbol, required String resultadoPartido}) { 
     return TableCell(
       verticalAlignment: TableCellVerticalAlignment.fill, 
       child: Container(
         color: isOdd ? const Color(0xFFFF6347) : Colors.white, 
-        padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: kIsWeb ? 2.5 : 2.5), 
+        // === SOLUCIÓN SIMETRÍA: Ahora TODAS las celdas (pares e impares) tienen los mismos padding ===
+        padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: kIsWeb ? 2.5 : 1.5), 
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [_buildSmallSquare('1', isMarked: markedSymbol == '1', isOddColumn: isOdd, resultado: resultadoPartido), _buildSmallSquare('X', isMarked: markedSymbol == 'X', isOddColumn: isOdd, resultado: resultadoPartido), _buildSmallSquare('2', isMarked: markedSymbol == '2', isOddColumn: isOdd, resultado: resultadoPartido)])
       )
     ); 
@@ -473,13 +489,19 @@ class _BoletoBoxState extends State<BoletoBox> {
   Widget _buildSmallSquare(String text, {required bool isMarked, required bool isOddColumn, required String resultado}) {
     bool isResultado = (resultado == text); Color bgColor = Colors.white; Color textColor = isMarked ? const Color(0xFF080868) : const Color.fromRGBO(255, 180, 180, 1);
     if (resultado == '0') { if (isMarked) bgColor = const Color.fromRGBO(33, 240, 240, 1.0); } else { if (isResultado) { if (isMarked) { bgColor = Colors.amber; textColor = const Color(0xFF080868); } else { bgColor = Colors.grey.shade400; textColor = const Color(0xFF080868); } } else { if (isMarked) { bgColor = Colors.redAccent; textColor = Colors.white; } else { bgColor = Colors.white; } } }
-    Border? border = isOddColumn ? null : Border.all(color: Colors.redAccent, width: 1.0);
+    
+    // === SOLUCIÓN SIMETRÍA Y CENTRADO: Border idéntico para todos los cuadraditos de signos (rojos o blancos) ===
+    Border? border = isOddColumn ? Border.all(color: Colors.redAccent, width: 1.0) : Border.all(color: Colors.redAccent, width: 1.0);
+    
     return Expanded(
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 3.5, vertical: 1.5), 
+        // === SOLUCIÓN: Margen ensanchado para que la caja "1", "X", "2" se vea con más color rojo ===
+        margin: const EdgeInsets.symmetric(horizontal: 4.5, vertical: 1.0), 
+        padding: EdgeInsets.symmetric(vertical: kIsWeb ? 0.0 : 1.0),
+        // === SOLUCIÓN CENTRADO: Obliga a centrar el contenido perfectamente ===
         alignment: Alignment.center, 
         decoration: BoxDecoration(color: bgColor, border: border), 
-        child: Text(text, textAlign: TextAlign.center, style: TextStyle(color: textColor, fontWeight: isMarked ? FontWeight.bold : FontWeight.normal, fontSize: kIsWeb ? 11 : 20))
+        child: FittedBox(fit: BoxFit.scaleDown, child: Text(text, textAlign: TextAlign.center, style: TextStyle(color: textColor, fontWeight: isMarked ? FontWeight.bold : FontWeight.normal, fontSize: kIsWeb ? 11 : 18)))
       )
     );
   }
